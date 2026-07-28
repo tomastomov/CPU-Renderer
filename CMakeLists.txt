@@ -9,10 +9,14 @@ if(DEFINED ENV{VCPKG_ROOT})
 endif()
 
 project(CPU-Renderer LANGUAGES CXX)
-add_executable(CPU-Renderer src/main.cpp)
+add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h")
 
 target_compile_features(CPU-Renderer PRIVATE cxx_std_20)
 
 find_package(SDL3 CONFIG REQUIRED)
 
 target_link_libraries(CPU-Renderer PRIVATE SDL3::SDL3)
+
+target_include_directories(CPU-Renderer PRIVATE src/headers)
+
+target_precompile_headers(CPU-Renderer PRIVATE src/headers/pch.h)
