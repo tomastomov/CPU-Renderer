@@ -9,7 +9,7 @@ if(DEFINED ENV{VCPKG_ROOT})
 endif()
 
 project(CPU-Renderer LANGUAGES CXX)
-add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h")
+add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h")
 
 target_compile_features(CPU-Renderer PRIVATE cxx_std_20)
 
