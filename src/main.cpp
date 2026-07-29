@@ -130,7 +130,7 @@ int main() {
 
     DrawTriangle(v1, v2, v3, frameBuffer, WIDTH, HEIGHT);
     DrawTriangle(v1 * 10.0f, v2 * 10.0f, v3 * 10.0f, frameBuffer, WIDTH, HEIGHT);
-    DrawTriangle({WIDTH * 0.5f, HEIGHT - 200.0f}, {(WIDTH * 0.5f - 200.0f), HEIGHT * 0.5f}, {(WIDTH * 0.5f) + 200.0f, HEIGHT * 0.5f}, frameBuffer, WIDTH, HEIGHT);
+    DrawTriangle({(WIDTH * 0.5f) + 200.0f, (HEIGHT * 0.5f) - 200.0f }, {(WIDTH * 0.5f - 200.0f), (HEIGHT * 0.5f) - 200.0f}, { WIDTH * 0.5f, HEIGHT - 200.0f }, frameBuffer, WIDTH, HEIGHT);
 
     SDL_UpdateTexture(texture, nullptr, frameBuffer, WIDTH * sizeof(uint32_t));
 
