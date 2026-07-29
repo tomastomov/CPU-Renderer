@@ -54,10 +54,13 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
         startX += normalizedLine.x;
         startY += normalizedLine.y;
 
-        int frameBufferIndex = std::round(startY) * WIDTH + std::round(startX);
-        if (frameBufferIndex < WIDTH * HEIGHT) {
-            frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
+        if (startX >= WIDTH || startY >= HEIGHT) {
+            return;
         }
+
+        int frameBufferIndex = std::round(startY) * WIDTH + std::round(startX);
+        frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
+
         xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
         yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
         CPURenderer::Log("Drawing pixel point x: {}, y: {} at screen location {}", startX, startY, frameBufferIndex);
