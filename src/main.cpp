@@ -59,7 +59,9 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
         }
 
         int frameBufferIndex = std::round(startY) * WIDTH + std::round(startX);
-        frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
+        int all = WIDTH * HEIGHT;
+
+        frameBuffer[all - frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
 
         xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
         yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
@@ -128,7 +130,7 @@ int main() {
 
     DrawTriangle(v1, v2, v3, frameBuffer, WIDTH, HEIGHT);
     DrawTriangle(v1 * 10.0f, v2 * 10.0f, v3 * 10.0f, frameBuffer, WIDTH, HEIGHT);
-    DrawTriangle(v1 * 100.0f, v2 * 100.0f, v3 * 100.0f, frameBuffer, WIDTH, HEIGHT);
+    DrawTriangle({WIDTH * 0.5f, HEIGHT - 200.0f}, {(WIDTH * 0.5f - 200.0f), HEIGHT * 0.5f}, {(WIDTH * 0.5f) + 200.0f, HEIGHT * 0.5f}, frameBuffer, WIDTH, HEIGHT);
 
     SDL_UpdateTexture(texture, nullptr, frameBuffer, WIDTH * sizeof(uint32_t));
 
