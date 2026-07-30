@@ -68,6 +68,18 @@ struct Matrix3x3 {
     }
 };
 
+struct Triangle2D {
+    Vector2 a;
+    Vector2 b;
+    Vector2 c;
+    Vector2 pos;
+    Vector2 size;
+    
+    static Triangle2D Create(Vector2 a, Vector2 b, Vector2 c, Vector2 pos, Vector2 size) {
+        return Triangle2D(a, b, c, pos, size);
+    }
+};
+
 static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
     return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
@@ -89,7 +101,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
         startX += normalizedLine.x;
         startY += normalizedLine.y;
 
-        if (startX >= WIDTH || startY >= HEIGHT) {
+        if (std::round(startX) >= WIDTH || std::round(startY) >= HEIGHT) {
             return;
         }
 
@@ -104,28 +116,40 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
     }
 }
 
-static void DrawTriangle(Vector2 a, Vector2 b, Vector2 c, uint32_t* frameBuffer, int WIDTH, int HEIGHT) {
-    double aLen = a.GetLength();
-    double bLen = b.GetLength();
-    double cLen = c.GetLength();
+static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH, int HEIGHT) {
+    double aLen = triangle.a.GetLength();
+    double bLen = triangle.b.GetLength();
+    double cLen = triangle.c.GetLength();
 
     if (aLen + bLen <= cLen || aLen + cLen <= bLen || bLen + cLen <= aLen) {
         CPURenderer::Log("Invalid triangle");
         return;
     }
 
-    Vector2 caLine = (c - a).GetNormalized();
 
-    Vector2 cbLine = (c - b).GetNormalized();
+    auto identity = Matrix3x3::GetIdentity();
+    identity.Scale(triangle.size);
+    identity.Translate(triangle.pos);
+
+    Matrix3x3 projectionMatrix = Matrix3x3::GetIdentity();
+    projectionMatrix.Translate({ 1 + (WIDTH * 0.5f), 1 + (HEIGHT * 0.5f) });
+
+    triangle.a = projectionMatrix * identity * triangle.a;
+    triangle.b = projectionMatrix * identity * triangle.b;
+    triangle.c = projectionMatrix * identity * triangle.c;
+
+    Vector2 caLine = (triangle.c - triangle.a).GetNormalized();
+
+    Vector2 cbLine = (triangle.c - triangle.b).GetNormalized();
     
-    while (a.x * (caLine.x >= 0.0f ? 1.0f : -1.0f) <= c.x && a.y * (caLine.y >= 0.0f ? 1.0f : -1.0f) <= c.y && b.x * (cbLine.x >= 0.0f ? 1.0f : -1.0f) <= c.x && b.y * (cbLine.y >= 0.0f ? 1.0f : -1.0f) <= c.y) {
-        a.x += caLine.x;
-        a.y += caLine.y;
+    while (triangle.a.x * (caLine.x >= 0.0f ? 1.0f : -1.0f) <= triangle.c.x && triangle.a.y * (caLine.y >= 0.0f ? 1.0f : -1.0f) <= triangle.c.y && triangle.b.x * (cbLine.x >= 0.0f ? 1.0f : -1.0f) <= triangle.c.x && triangle.b.y * (cbLine.y >= 0.0f ? 1.0f : -1.0f) <= triangle.c.y) {
+        triangle.a.x += caLine.x;
+        triangle.a.y += caLine.y;
 
-        b.x += cbLine.x;
-        b.y += cbLine.y;
+        triangle.b.x += cbLine.x;
+        triangle.b.y += cbLine.y;
 
-        DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
+        DrawLine(triangle.a, triangle.b, frameBuffer, WIDTH, HEIGHT);
     }
 
     return;
@@ -160,20 +184,13 @@ int main() {
 
     uint32_t* frameBuffer = new uint32_t[WIDTH * HEIGHT];
 
-    Vector2 v1 = { 20.0f, 20.0f };
-    Vector2 v2 = { 40.0f, 20.0f };
-    Vector2 v3 = { 30.0f, 60.0f };
+    Vector2 bottomLeft = { -0.5f, -0.5f };
+    Vector2 topLeft = { -0.5f, 0.5f };
+    Vector2 bottomRight = { 0.5f, -0.5f };
 
-    auto identity = Matrix3x3::GetIdentity();
-    identity.Scale(2.0f);
-    identity.Translate({300.0f, 100.0f});
+    Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, {-400.0f, 400.0f}, {100.0f, 100.0f});
 
-    Vector2 movedVector = identity * v1;
-    movedVector.Print();
-
-    DrawTriangle(v1, v2, v3, frameBuffer, WIDTH, HEIGHT);
-    DrawTriangle(v1 * 10.0f, v2 * 10.0f, v3 * 10.0f, frameBuffer, WIDTH, HEIGHT);
-    DrawTriangle({(WIDTH * 0.5f) + 200.0f, (HEIGHT * 0.5f) - 200.0f }, {(WIDTH * 0.5f - 200.0f), (HEIGHT * 0.5f) - 200.0f}, { WIDTH * 0.5f, HEIGHT - 200.0f }, frameBuffer, WIDTH, HEIGHT);
+    DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 
     SDL_UpdateTexture(texture, nullptr, frameBuffer, WIDTH * sizeof(uint32_t));
 
