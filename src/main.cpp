@@ -5,12 +5,75 @@
 
 using CPURenderer::Vector2;
 
+struct Matrix3x3 {
+    float arr[3][3];
+    Matrix3x3(const int(&a)[3][3]) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                arr[i][j] = a[i][j];
+            }
+        }
+    }
+
+    static Matrix3x3 GetIdentity() {
+        static constexpr int identity[3][3] = {
+            {1, 0, 0,}, {0, 1, 0}, {0, 0, 1}
+        };
+
+        return Matrix3x3(identity);
+    }
+
+    void Scale(float scaleFactor) {
+        for (int i = 0; i < 2; i++) {
+            arr[i][i] *= scaleFactor;
+        }
+    }
+
+    void Scale(Vector2 v) {
+        arr[0][0] *= v.x;
+        arr[1][1] *= v.y;
+    }
+
+    void Translate(Vector2 v) {
+        for (int i = 0; i < 2; i++) {
+            arr[i][2] = (i == 0 ? v.x : v.y);
+        }
+    }
+
+    void Print() {
+        CPURenderer::Log("First row: {} {} {}", arr[0][0], arr[0][1], arr[0][2]);
+        CPURenderer::Log("Second row: {} {} {}", arr[1][0], arr[1][1], arr[1][2]);
+        CPURenderer::Log("Third row: {} {} {}", arr[2][0], arr[2][1], arr[2][2]);
+    }
+
+    Matrix3x3 operator *(const Matrix3x3& other) {
+        int result[3][3];
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                result[i][j] = (arr[i][0] * other.arr[0][j]) + (arr[i][1] * other.arr[1][j]) + (arr[i][2] * other.arr[2][j]);
+            }
+        }
+
+        return Matrix3x3(result);
+    }
+
+    Vector2 operator *(const Vector2 v) {
+        Vector2 res;
+
+        res.x = (arr[0][0] * v.x) + (arr[0][1] * v.y) + (arr[0][2] * 1);
+        res.y = (arr[1][0] * v.x) + (arr[1][1] * v.y) + (arr[1][2] * 1);
+
+        return res;
+    }
+};
+
 static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
     return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
 
 static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
-    CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
+    //CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
     Vector2 line = b - a;
     Vector2 normalizedLine = line.GetNormalized();
 
@@ -37,7 +100,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 
         xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
         yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
-        CPURenderer::Log("Drawing pixel point x: {}, y: {} at screen location {}", startX, startY, frameBufferIndex);
+        //CPURenderer::Log("Drawing pixel point x: {}, y: {} at screen location {}", startX, startY, frameBufferIndex);
     }
 }
 
@@ -100,6 +163,13 @@ int main() {
     Vector2 v1 = { 20.0f, 20.0f };
     Vector2 v2 = { 40.0f, 20.0f };
     Vector2 v3 = { 30.0f, 60.0f };
+
+    auto identity = Matrix3x3::GetIdentity();
+    identity.Scale(2.0f);
+    identity.Translate({300.0f, 100.0f});
+
+    Vector2 movedVector = identity * v1;
+    movedVector.Print();
 
     DrawTriangle(v1, v2, v3, frameBuffer, WIDTH, HEIGHT);
     DrawTriangle(v1 * 10.0f, v2 * 10.0f, v3 * 10.0f, frameBuffer, WIDTH, HEIGHT);

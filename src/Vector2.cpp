@@ -30,4 +30,9 @@ namespace CPURenderer {
     {
         return Vector2(x * value, y * value);
     }
+
+    void Vector2::Print()
+    {
+        CPURenderer::Log("Vector -> x: {}, y: {}", x, y);
+    }
 }
