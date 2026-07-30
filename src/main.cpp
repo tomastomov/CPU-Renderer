@@ -20,7 +20,7 @@ struct Vector2 {
     Vector2 GetNormalized() {
         double length = GetLength();
 
-        if (length <= 0.01) {
+        if (length <= 0.001) {
             CPURenderer::Log("Length of a vector is too small skipping normalization");
             return *this;
         }
@@ -61,7 +61,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
         int frameBufferIndex = std::round(startY) * WIDTH + std::round(startX);
         int all = WIDTH * HEIGHT;
 
-        frameBuffer[all - frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
+        frameBuffer[all - 1 - frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
 
         xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
         yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
