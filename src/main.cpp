@@ -1,41 +1,11 @@
 #include "pch.h"
 #include <Log.h>
 #include <SDL3/SDL.h>
+#include <Vector2.h>
 
 static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
     return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
-
-struct Vector2 {
-    float x;
-    float y;
-    
-    double GetLength() {
-        double xSquared = x * x;
-        double ySquared = y * y;
-
-        return std::sqrt(xSquared + ySquared);
-    }
-
-    Vector2 GetNormalized() {
-        double length = GetLength();
-
-        if (length <= 0.001) {
-            CPURenderer::Log("Length of a vector is too small skipping normalization");
-            return *this;
-        }
-
-        return Vector2(x / length, y / length);
-    }
-
-    Vector2 operator-(const Vector2 other) {
-        return Vector2(x - other.x, y - other.y);
-    }
-
-    Vector2 operator*(const float value) {
-        return Vector2(x * value, y * value);
-    }
-};
 
 static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
     CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
