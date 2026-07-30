@@ -1,4 +1,4 @@
-#include "pch.h";
+#include "pch.h"
 #include <Log.h>
 #include <SDL3/SDL.h>
 
@@ -83,6 +83,20 @@ static void DrawTriangle(Vector2 a, Vector2 b, Vector2 c, uint32_t* frameBuffer,
     DrawLine(a, c, frameBuffer, WIDTH, HEIGHT);
     DrawLine(b, c, frameBuffer, WIDTH, HEIGHT);
 
+    Vector2 caLine = (c - a).GetNormalized();
+
+    Vector2 cbLine = (c - b).GetNormalized();
+    
+    while (a.x * (caLine.x >= 0.0f ? 1.0f : -1.0f) <= c.x && a.y * (caLine.y >= 0.0f ? 1.0f : -1.0f) <= c.y && b.x * (cbLine.x >= 0.0f ? 1.0f : -1.0f) <= c.x && b.y * (cbLine.y >= 0.0f ? 1.0f : -1.0f) <= c.y) {
+        a.x += caLine.x;
+        a.y += caLine.y;
+
+        b.x += cbLine.x;
+        b.y += cbLine.y;
+
+        DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
+    }
+
     return;
 }
 
@@ -114,15 +128,6 @@ int main() {
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
     uint32_t* frameBuffer = new uint32_t[WIDTH * HEIGHT];
-    
-    for (int i = 0; i < WIDTH * HEIGHT; i++) {
-        if (i > WIDTH * 50) {
-            frameBuffer[i] = GetColorFromARGB(0, 0, 0, 0);
-        }
-        else {
-            frameBuffer[i] = GetColorFromARGB(255, 255, 0, 0);
-        }
-    }
 
     Vector2 v1 = { 20.0f, 20.0f };
     Vector2 v2 = { 40.0f, 20.0f };
