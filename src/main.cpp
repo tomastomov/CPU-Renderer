@@ -79,10 +79,6 @@ static void DrawTriangle(Vector2 a, Vector2 b, Vector2 c, uint32_t* frameBuffer,
         return;
     }
 
-    DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
-    DrawLine(a, c, frameBuffer, WIDTH, HEIGHT);
-    DrawLine(b, c, frameBuffer, WIDTH, HEIGHT);
-
     Vector2 caLine = (c - a).GetNormalized();
 
     Vector2 cbLine = (c - b).GetNormalized();
