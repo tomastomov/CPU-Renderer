@@ -144,7 +144,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 		startX += normalizedLine.x;
 		startY += normalizedLine.y;
 		int roundedX = std::round(startX);
-		int roundedY = std::round(startY);
+		int roundedY = HEIGHT - 1 - std::round(startY);
 
 		if (roundedX >= WIDTH || roundedY >= HEIGHT || roundedX < 0 || roundedY < 0) {
 			CPURenderer::Log("Skipping point - x: {}, y: {}", roundedX, roundedY);
@@ -187,18 +187,6 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 	c = transform * c;
 
 	CPURenderer::Log("Points after rotation a: ({}, {}), b: ({}, {}), c: ({}, {})", a.x, a.y, b.x, b.y, c.x, c.y);
-
-	/*if (b.y > c.y) {
-		Vector2 temp = c;
-		c = b;
-		b = temp;
-	}
-
-	if (a.y > c.y) {
-		Vector2 temp = c;
-		c = a;
-		a = temp;
-	}*/
 
 	Vector2 caLine = (c - a).GetNormalized();
 
@@ -258,7 +246,7 @@ int main() {
 	Vector2 topLeft = { -0.5f, 0.5f };
 	Vector2 bottomRight = { 0.5f, -0.5f };
 
-	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 500, 500 }, { 500.0f, 500.0f}, 285.0f);
+	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 500, 500 }, { 30.0f, 30.0f}, 0.0f);
 
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 
