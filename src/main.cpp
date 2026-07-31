@@ -28,34 +28,31 @@ static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 
 static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
 	CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
+	int processedPoints = 0;
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
 
-	float startX = a.x;
-	float startY = a.y;
-	float endX = b.x;
-	float endY = b.y;
+	Vector2 start = { a.x, a.y };
+	Vector2 end = { b.x, b.y };
 
-	bool xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
-	bool yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
+	bool xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x : start.x >= end.x;
+	bool yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
 
 	while (xCondition && yCondition) {
-		startX += normalizedLine.x;
-		startY += normalizedLine.y;
-		int roundedX = std::round(startX);
-		int roundedY = HEIGHT - 1 - std::round(startY);
+		start.x += normalizedLine.x;
+		start.y += normalizedLine.y;
 
-		if (roundedX >= WIDTH || roundedY >= HEIGHT || roundedX < 0 || roundedY < 0) {
-			CPURenderer::Log("Skipping point - x: {}, y: {}", roundedX, roundedY);
-			return;
+		int roundedX = std::ceil(start.x);
+		int roundedY = HEIGHT - 1 - std::ceil(start.y);
+
+		if (roundedX < WIDTH && roundedY < HEIGHT && roundedX >= 0 && roundedY >= 0) {
+			int frameBufferIndex = roundedY * WIDTH + roundedX;
+
+			frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
 		}
 
-		int frameBufferIndex = roundedY * WIDTH + roundedX;
-
-		frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
-
-		xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
-		yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
+		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x: start.x >= end.x;
+		yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
 		//CPURenderer::Log("Drawing pixel point x: {}, y: {} at screen location {}", startX, startY, frameBufferIndex);
 	}
 }
@@ -96,6 +93,10 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 	};
 
 	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
+
+	DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
+	DrawLine(a, c, frameBuffer, WIDTH, HEIGHT);
+	DrawLine(b, c, frameBuffer, WIDTH, HEIGHT);
 
 	while (keepDrawing) {
 		a.x += caLine.x;
@@ -145,7 +146,7 @@ int main() {
 	Vector2 topLeft = { -0.5f, 0.5f };
 	Vector2 bottomRight = { 0.5f, -0.5f };
 
-	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 500, 500 }, { 30.0f, 30.0f}, 0.0f);
+	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 135.0f);
 
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 
