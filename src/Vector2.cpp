@@ -13,9 +13,9 @@ namespace CPURenderer {
     {
         double length = GetLength();
 
-        if (length <= 0.001) {
-            CPURenderer::Log("Length of a vector is too small skipping normalization");
-            return *this;
+        if (length <= 0.0001) {
+            CPURenderer::Log("Length of a vector is too small skipping normalization, {}", length);
+            return { 0, 0 };
         }
 
         return Vector2(x / length, y / length);
