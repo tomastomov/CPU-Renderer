@@ -5,6 +5,8 @@
 
 using CPURenderer::Vector2;
 
+//TODO::fix projection matrix and rotation
+
 struct Matrix3x3 {
     float arr[3][3];
     Matrix3x3(const int(&a)[3][3]) {
