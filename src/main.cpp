@@ -143,19 +143,17 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 	while (xCondition && yCondition) {
 		startX += normalizedLine.x;
 		startY += normalizedLine.y;
+		int roundedX = std::round(startX);
+		int roundedY = std::round(startY);
 
-		if (std::round(startX) >= WIDTH || std::round(startY) >= HEIGHT) {
+		if (roundedX >= WIDTH || roundedY >= HEIGHT || roundedX < 0 || roundedY < 0) {
+			CPURenderer::Log("Skipping point - x: {}, y: {}", roundedX, roundedY);
 			return;
 		}
-		else if (startX < 0 || startY < 0) {
-			return;
-		}
 
-		int frameBufferIndex = std::round(startY) * WIDTH + std::round(startX);
+		int frameBufferIndex = roundedY * WIDTH + roundedX;
 
-		int all = WIDTH * HEIGHT;
-
-		frameBuffer[all - 1 - frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
+		frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
 
 		xCondition = normalizedLine.x >= 0.0f ? startX <= endX : startX >= endX;
 		yCondition = normalizedLine.y >= 0.0f ? startY <= endY : startY >= endY;
@@ -182,19 +180,37 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 	Vector2 b = triangle.b;
 	Vector2 c = triangle.c;
 
-	CPURenderer::Log("Points initially a: x: {} y: {}, b: x: {}, y: {}, c: x: {}, y: {}", a.x, a.y, b.x, b.y, c.x, c.y);
+	//CPURenderer::Log("Points initially a: x: {} y: {}, b: x: {}, y: {}, c: x: {}, y: {}", a.x, a.y, b.x, b.y, c.x, c.y);
 
 	a = transform * a;
 	b = transform * b;
 	c = transform * c;
 
-	CPURenderer::Log("Points after rotation a: x: {} y: {}, b: x: {}, y: {}, c: x: {}, y: {}", a.x, a.y, b.x, b.y, c.x, c.y);
+	CPURenderer::Log("Points after rotation a: ({}, {}), b: ({}, {}), c: ({}, {})", a.x, a.y, b.x, b.y, c.x, c.y);
+
+	/*if (b.y > c.y) {
+		Vector2 temp = c;
+		c = b;
+		b = temp;
+	}
+
+	if (a.y > c.y) {
+		Vector2 temp = c;
+		c = a;
+		a = temp;
+	}*/
 
 	Vector2 caLine = (c - a).GetNormalized();
 
 	Vector2 cbLine = (c - b).GetNormalized();
 
-	while (a.x * (caLine.x >= 0.0f ? 1.0f : -1.0f) <= c.x && a.y * (caLine.y >= 0.0f ? 1.0f : -1.0f) <= c.y && b.x * (cbLine.x >= 0.0f ? 1.0f : -1.0f) <= c.x && b.y * (cbLine.y >= 0.0f ? 1.0f : -1.0f) <= c.y) {
+	auto hasNotReachedLineEnd = [](Vector2 line, Vector2 a, Vector2 b) -> bool {
+		return (line.x >= 0.0f ? a.x <= b.x : a.x >= b.x) && (line.y >= 0.0f ? a.y <= b.y : a.y >= b.y);
+	};
+
+	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
+
+	while (keepDrawing) {
 		a.x += caLine.x;
 		a.y += caLine.y;
 
@@ -202,6 +218,8 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 		b.y += cbLine.y;
 
 		DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
+
+		keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 	}
 
 	return;
@@ -240,7 +258,7 @@ int main() {
 	Vector2 topLeft = { -0.5f, 0.5f };
 	Vector2 bottomRight = { 0.5f, -0.5f };
 
-	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 500, 500 }, { 500.0f, 500.0f}, 90.0f);
+	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 500, 500 }, { 500.0f, 500.0f}, 285.0f);
 
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 
