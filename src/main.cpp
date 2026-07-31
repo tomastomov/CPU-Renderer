@@ -7,7 +7,7 @@
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
 
-//TODO::fix projection matrix and rotation
+//TODO:: figure out on how to know if a point is inside a triangle or not
 
 struct Triangle2D {
 	Vector2 a;
