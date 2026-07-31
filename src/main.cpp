@@ -23,18 +23,29 @@ struct Matrix3x3 {
         return Matrix3x3(identity);
     }
 
-    void Scale(float scaleFactor) {
+    void Scale(const float scaleFactor) {
         for (int i = 0; i < 2; i++) {
             arr[i][i] *= scaleFactor;
         }
     }
 
-    void Scale(Vector2 v) {
+    void Scale(const Vector2 v) {
         arr[0][0] *= v.x;
         arr[1][1] *= v.y;
     }
 
-    void Translate(Vector2 v) {
+    void Rotate(const float angle) {
+        float radians = angle * std::numbers::pi / 180.0f;
+        float cos = std::cos(radians);
+        float sin = std::sin(radians);
+
+        arr[0][0] = cos;
+        arr[0][1] = -sin;
+        arr[1][0] = sin;
+        arr[1][1] = cos;
+    }
+
+    void Translate(const Vector2 v) {
         for (int i = 0; i < 2; i++) {
             arr[i][2] = (i == 0 ? v.x : v.y);
         }
@@ -74,9 +85,10 @@ struct Triangle2D {
     Vector2 c;
     Vector2 pos;
     Vector2 size;
+    float rotate;
     
-    static Triangle2D Create(Vector2 a, Vector2 b, Vector2 c, Vector2 pos, Vector2 size) {
-        return Triangle2D(a, b, c, pos, size);
+    static Triangle2D Create(Vector2 a, Vector2 b, Vector2 c, Vector2 pos, Vector2 size, float rotate) {
+        return Triangle2D(a, b, c, pos, size, rotate);
     }
 };
 
@@ -104,8 +116,12 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
         if (std::round(startX) >= WIDTH || std::round(startY) >= HEIGHT) {
             return;
         }
+        else if (startX < 0 || startY < 0) {
+            return;
+        }
 
         int frameBufferIndex = std::round(startY) * WIDTH + std::round(startX);
+        
         int all = WIDTH * HEIGHT;
 
         frameBuffer[all - 1 - frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
@@ -117,26 +133,33 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 }
 
 static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH, int HEIGHT) {
-    double aLen = triangle.a.GetLength();
-    double bLen = triangle.b.GetLength();
-    double cLen = triangle.c.GetLength();
+    double abLen = (triangle.b - triangle.a).GetLength();
+    double bcLen = (triangle.c - triangle.b).GetLength();
+    double caLen = (triangle.a - triangle.c).GetLength();
 
-    if (aLen + bLen <= cLen || aLen + cLen <= bLen || bLen + cLen <= aLen) {
+    if (abLen + bcLen <= caLen ||
+        abLen + caLen <= bcLen ||
+        bcLen + caLen <= abLen)
+    {
         CPURenderer::Log("Invalid triangle");
         return;
     }
 
-
-    auto identity = Matrix3x3::GetIdentity();
-    identity.Scale(triangle.size);
-    identity.Translate(triangle.pos);
+    auto model = Matrix3x3::GetIdentity();
+    auto identityScale = Matrix3x3::GetIdentity();
+    identityScale.Scale(triangle.size);
+   
+    auto identityMove = Matrix3x3::GetIdentity();
+    identityMove.Translate(triangle.pos);
 
     Matrix3x3 projectionMatrix = Matrix3x3::GetIdentity();
     projectionMatrix.Translate({ 1 + (WIDTH * 0.5f), 1 + (HEIGHT * 0.5f) });
 
-    triangle.a = projectionMatrix * identity * triangle.a;
-    triangle.b = projectionMatrix * identity * triangle.b;
-    triangle.c = projectionMatrix * identity * triangle.c;
+    model = identityMove * identityScale;
+
+    triangle.a = projectionMatrix * model * triangle.a;
+    triangle.b = projectionMatrix * model * triangle.b;
+    triangle.c = projectionMatrix * model * triangle.c;
 
     Vector2 caLine = (triangle.c - triangle.a).GetNormalized();
 
@@ -188,7 +211,7 @@ int main() {
     Vector2 topLeft = { -0.5f, 0.5f };
     Vector2 bottomRight = { 0.5f, -0.5f };
 
-    Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, {-400.0f, 400.0f}, {100.0f, 100.0f});
+    Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, {0.0f, 0.0f}, {100.0f, 100.0f}, 90.0f);
 
     DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 
