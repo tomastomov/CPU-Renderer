@@ -26,8 +26,17 @@ static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 	return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
 
-static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
-	if (x < WIDTH && y < HEIGHT && x >= 0 && y >= 0) {
+static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT, Vector2 end, Vector2 line) {
+	int endX = std::floor(end.x);
+	int endY = std::floor(end.y);
+
+	bool isOnLine = (line.x <= 0 ? x >= endX : x <= endX) && (line.y <= 0 ? y >= endY : y <= endY);
+
+	if (!isOnLine) {
+		CPURenderer::Log("({}, {}) is not on line ({}, {}) with slope ({}, {})", x, y, endX, endY, line.x, line.y);
+	}
+	
+	if (x < WIDTH && y < HEIGHT && x >= 0 && y >= 0 && isOnLine) {
 		int frameBufferIndex = y * WIDTH + x;
 
 		frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
@@ -36,7 +45,6 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, cons
 
 static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
 	CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
-	int processedPoints = 0;
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
 
@@ -50,10 +58,10 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 		start.x += normalizedLine.x;
 		start.y += normalizedLine.y;
 
-		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, WIDTH, HEIGHT);
-		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, WIDTH, HEIGHT);
-		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, WIDTH, HEIGHT);
-		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, WIDTH, HEIGHT);
+		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
+		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
+		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
+		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
 
 		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x: start.x >= end.x;
 		yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
@@ -80,13 +88,9 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 	Vector2 b = triangle.b;
 	Vector2 c = triangle.c;
 
-	//CPURenderer::Log("Points initially a: x: {} y: {}, b: x: {}, y: {}, c: x: {}, y: {}", a.x, a.y, b.x, b.y, c.x, c.y);
-
 	a = transform * a;
 	b = transform * b;
 	c = transform * c;
-
-	CPURenderer::Log("Points after rotation a: ({}, {}), b: ({}, {}), c: ({}, {})", a.x, a.y, b.x, b.y, c.x, c.y);
 
 	Vector2 caLine = (c - a).GetNormalized();
 
@@ -108,7 +112,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 
 		b.x += cbLine.x;
 		b.y += cbLine.y;
-
+			
 		DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
 
 		keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
@@ -150,8 +154,8 @@ int main() {
 	Vector2 topLeft = { -0.5f, 0.5f };
 	Vector2 bottomRight = { 0.5f, -0.5f };
 
-	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 0.0f);
-	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 20.0f, 20.0f }, 0.0f);
+	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
+	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);
 
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 	DrawTriangle(triangle2, frameBuffer, WIDTH, HEIGHT);
