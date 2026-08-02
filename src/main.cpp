@@ -22,6 +22,18 @@ struct Triangle2D {
 	}
 };
 
+struct Quad2D {
+	Vector2 pos;
+	Vector2 size;
+	float rotate;
+	std::vector<Vector2> points;
+	std::vector<uint32_t> indeces;
+
+	static Quad2D Create(Vector2 pos, Vector2 size, float rotate, std::vector<Vector2>&& points, std::vector<uint32_t>&& indeces) {
+		return Quad2D(pos, size, rotate, points, indeces);
+	}
+};
+
 static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 	return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
@@ -47,6 +59,10 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 	CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
+
+	if (normalizedLine == Vector2::ZERO_VECTOR) {
+		return;
+	}
 
 	Vector2 start = { a.x, a.y };
 	Vector2 end = { b.x, b.y };
@@ -121,6 +137,19 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, int WIDTH,
 	return;
 }
 
+static void DrawQuad(Quad2D quad, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
+	auto& indeces = quad.indeces;
+	if (indeces.size() == 0 || indeces.size() % 3 != 0) {
+		CPURenderer::Log("Not enough indeces provided");
+		return;
+	}
+
+	for (int i = 0; i < indeces.size(); i += 3) {
+		Triangle2D triangle = Triangle2D::Create(quad.points[indeces[i]], quad.points[indeces[i + 1]], quad.points[indeces[i + 2]], quad.pos, quad.size, quad.rotate);
+		DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
+	}
+}
+
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		CPURenderer::Log("Failed to init sdl video");
@@ -153,12 +182,17 @@ int main() {
 	Vector2 bottomLeft = { -0.5f, -0.5f };
 	Vector2 topLeft = { -0.5f, 0.5f };
 	Vector2 bottomRight = { 0.5f, -0.5f };
+	Vector2 topRight = { 0.5f, 0.5f };
 
-	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
+	Quad2D quad = Quad2D::Create({ 500.0f, 500.0f }, { 500.0f, 500.0f }, -45.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
+
+	DrawQuad(quad, frameBuffer, WIDTH, HEIGHT);
+
+	/*Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
 	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);
 
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
-	DrawTriangle(triangle2, frameBuffer, WIDTH, HEIGHT);
+	DrawTriangle(triangle2, frameBuffer, WIDTH, HEIGHT);*/
 
 	SDL_UpdateTexture(texture, nullptr, frameBuffer, WIDTH * sizeof(uint32_t));
 

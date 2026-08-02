@@ -6,6 +6,8 @@ namespace CPURenderer {
         float x;
         float y;
 
+        static const Vector2 ZERO_VECTOR;
+
         double GetLength();
 
         Vector2 GetNormalized();
@@ -13,6 +15,8 @@ namespace CPURenderer {
         Vector2 operator-(const Vector2 other);
 
         Vector2 operator*(const float value);
+
+        bool operator==(const Vector2 other);
 
         void Print();
     };

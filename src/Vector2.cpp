@@ -1,6 +1,8 @@
 #include "Vector2.h"
 
 namespace CPURenderer {
+    const Vector2 Vector2::ZERO_VECTOR = { 0.0f, 0.0f };
+
     double Vector2::GetLength()
     {
         double xSquared = x * x;
@@ -15,7 +17,7 @@ namespace CPURenderer {
 
         if (length <= 0.0001) {
             CPURenderer::Log("Length of a vector is too small skipping normalization, {}", length);
-            return { 0, 0 };
+            return ZERO_VECTOR;
         }
 
         return Vector2(x / length, y / length);
@@ -29,6 +31,11 @@ namespace CPURenderer {
     Vector2 Vector2::operator*(const float value)
     {
         return Vector2(x * value, y * value);
+    }
+
+    bool Vector2::operator==(const Vector2 other)
+    {
+        return x == other.x && y == other.y;
     }
 
     void Vector2::Print()
