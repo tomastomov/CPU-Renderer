@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <Vector2.h>
 #include <Matrix3x3.h>
+#include <Quad2D.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
@@ -19,18 +20,6 @@ struct Triangle2D {
 
 	static Triangle2D Create(Vector2 a, Vector2 b, Vector2 c, Vector2 pos, Vector2 size, float rotate) {
 		return Triangle2D(a, b, c, pos, size, rotate);
-	}
-};
-
-struct Quad2D {
-	Vector2 pos;
-	Vector2 size;
-	float rotate;
-	std::vector<Vector2> points;
-	std::vector<uint32_t> indeces;
-
-	static Quad2D Create(Vector2 pos, Vector2 size, float rotate, std::vector<Vector2>&& points, std::vector<uint32_t>&& indeces) {
-		return Quad2D(pos, size, rotate, points, indeces);
 	}
 };
 
@@ -149,7 +138,7 @@ static void DrawQuad(Quad2D quad, uint32_t* frameBuffer, const int WIDTH, const 
 		DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 	}
 }
-
+	
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		CPURenderer::Log("Failed to init sdl video");
@@ -184,7 +173,7 @@ int main() {
 	Vector2 bottomRight = { 0.5f, -0.5f };
 	Vector2 topRight = { 0.5f, 0.5f };
 
-	Quad2D quad = Quad2D::Create({ 500.0f, 500.0f }, { 500.0f, 500.0f }, -45.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
+	Quad2D quad = Quad2D::Create({ 500.0f, 500.0f }, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
 
 	DrawQuad(quad, frameBuffer, WIDTH, HEIGHT);
 
