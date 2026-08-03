@@ -4,24 +4,12 @@
 #include <Vector2.h>
 #include <Matrix3x3.h>
 #include <Quad2D.h>
+#include <Triangle2D.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
-
-struct Triangle2D {
-	Vector2 a;
-	Vector2 b;
-	Vector2 c;
-	Vector2 pos;
-	Vector2 size;
-	float rotate;
-
-	static Triangle2D Create(Vector2 a, Vector2 b, Vector2 c, Vector2 pos, Vector2 size, float rotate) {
-		return Triangle2D(a, b, c, pos, size, rotate);
-	}
-};
 
 static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 	return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
