@@ -5,9 +5,11 @@
 #include <Matrix3x3.h>
 #include <Quad2D.h>
 #include <Triangle2D.h>
+#include <GameConfig.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
+using CPURenderer::GameConfig;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 
@@ -71,7 +73,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 	}
 }
 
-static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
+static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const GameConfig& config) {
 	double abLen = (triangle.b - triangle.a).GetLength();
 	double bcLen = (triangle.c - triangle.b).GetLength();
 	double caLen = (triangle.a - triangle.c).GetLength();
@@ -84,15 +86,18 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const int 
 		return;
 	}
 
+	Matrix3x3 viewportProjectionMatrix = Matrix3x3::GetScaled({ config.VIEWPORT_WIDTH * 0.5f , config.VIEWPORT_HEIGHT * 0.5f }) * Matrix3x3::GetTranslated({ 1.0f, 1.0f });
+	Matrix3x3 ndsProjectionMatrix = Matrix3x3::GetTranslated({ -1.0f, -1.0f }) * Matrix3x3::GetScaled({ 2.0f / config.WIDTH, 2.0f / config.HEIGHT});
 	Matrix3x3 transform = Matrix3x3::GetTranslated(triangle.pos) * Matrix3x3::GetRotated(triangle.rotate) * Matrix3x3::GetScaled(triangle.size);
+	Matrix3x3 projection = viewportProjectionMatrix * ndsProjectionMatrix * transform;
 
 	Vector2 a = triangle.a;
 	Vector2 b = triangle.b;
 	Vector2 c = triangle.c;
 
-	a = transform * a;
-	b = transform * b;
-	c = transform * c;
+	a = projection * a;
+	b = projection * b;
+	c = projection * c;
 
 	Vector2 caLine = (c - a).GetNormalized();
 
@@ -104,9 +109,9 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const int 
 
 	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 
-	DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
-	DrawLine(a, c, frameBuffer, WIDTH, HEIGHT);
-	DrawLine(b, c, frameBuffer, WIDTH, HEIGHT);
+	DrawLine(a, b, frameBuffer, config.WIDTH, config.HEIGHT);
+	DrawLine(a, c, frameBuffer, config.WIDTH, config.HEIGHT);
+	DrawLine(b, c, frameBuffer, config.WIDTH, config.HEIGHT);
 
 	while (keepDrawing) {
 		a.x += caLine.x;
@@ -115,7 +120,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const int 
 		b.x += cbLine.x;
 		b.y += cbLine.y;
 			
-		DrawLine(a, b, frameBuffer, WIDTH, HEIGHT);
+		DrawLine(a, b, frameBuffer, config.WIDTH, config.HEIGHT);
 
 		keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 	}
@@ -123,7 +128,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const int 
 	return;
 }
 
-static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
+static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config) {
 	auto& indeces = quad.indeces;
 	if (indeces.size() == 0 || indeces.size() % 3 != 0) {
 		CPURenderer::Log("Not enough indeces provided");
@@ -132,11 +137,11 @@ static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const int WIDTH, const
 
 	for (int i = 0; i < indeces.size(); i += 3) {
 		Triangle2D triangle = Triangle2D::Create(quad.points[indeces[i]], quad.points[indeces[i + 1]], quad.points[indeces[i + 2]], quad.pos, quad.size, quad.rotate);
-		DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
+		DrawTriangle(triangle, frameBuffer, config);
 	}
 }
 
-static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
+static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig& config) {
 	constexpr int points = 360;
 	float angle = 1.0f;
 	float radius = 1.0f;
@@ -150,7 +155,7 @@ static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const int WIDTH, 
 		float c = std::cos(angle);
 		Vector2 thirdPoint = { secondPoint.x * c - s * secondPoint.y, secondPoint.x * s + secondPoint.y * c };
 		Triangle2D triangle = Triangle2D::Create(centerPoint, prevPoint, thirdPoint, circle.center, circle.size, 0.0f);
-		DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
+		DrawTriangle(triangle, frameBuffer, config);
 		prevPoint = thirdPoint;
 		angle += 1.0f;
 	}
@@ -164,16 +169,15 @@ int main() {
 
 	CPURenderer::Log("SDL init successfully");
 
-	constexpr int WIDTH = 1920;
-	constexpr int HEIGHT = 1080;
-
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
 
+	GameConfig config;
+
 	if (!SDL_CreateWindowAndRenderer(
 		"CPU Renderer",
-		WIDTH,
-		HEIGHT,
+		config.WIDTH,
+		config.HEIGHT,
 		SDL_WINDOW_RESIZABLE,
 		&window,
 		&renderer)) {
@@ -181,18 +185,16 @@ int main() {
 		return -1;
 	}
 
-	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, config.WIDTH, config.HEIGHT);
 
-	uint32_t* frameBuffer = new uint32_t[WIDTH * HEIGHT]{};
+	uint32_t* frameBuffer = new uint32_t[config.WIDTH * config.HEIGHT]{};
 
 	Vector2 bottomLeft = { -0.5f, -0.5f };
 	Vector2 topLeft = { -0.5f, 0.5f };
 	Vector2 bottomRight = { 0.5f, -0.5f };
 	Vector2 topRight = { 0.5f, 0.5f };
 
-	Quad2D quad = Quad2D::Create({ 500.0f, 500.0f }, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
-
-	//DrawQuad(quad, frameBuffer, WIDTH, HEIGHT);
+	Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH), static_cast<float>(config.VIEWPORT_HEIGHT) }, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
 
 	/*Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
 	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);
@@ -200,13 +202,15 @@ int main() {
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 	DrawTriangle(triangle2, frameBuffer, WIDTH, HEIGHT);*/
 
-	DrawCircle(Circle2D::Create({ WIDTH * 0.5f, HEIGHT * 0.5f }, { 50.0f, 50.0f }), frameBuffer, WIDTH, HEIGHT);
+	//DrawCircle(Circle2D::Create({ WIDTH * 0.5f, HEIGHT * 0.5f }, { 50.0f, 50.0f }), frameBuffer, WIDTH, HEIGHT);
 
-	SDL_UpdateTexture(texture, nullptr, frameBuffer, WIDTH * sizeof(uint32_t));
+	SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
 	bool running = true;
 
 	while (running) {
+		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
+
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_EVENT_KEY_DOWN) {
@@ -219,6 +223,10 @@ int main() {
 				running = false;
 			}
 		}
+		
+		DrawQuad(quad, frameBuffer, config);
+
+		SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
 		SDL_RenderClear(renderer);
 		SDL_RenderTexture(renderer, texture, nullptr, nullptr);
