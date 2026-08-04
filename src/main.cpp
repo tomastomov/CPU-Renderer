@@ -31,7 +31,7 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, cons
 	bool isOnLine = (line.x <= 0 ? x >= endX : x <= endX) && (line.y <= 0 ? y >= endY : y <= endY);
 
 	if (!isOnLine) {
-		CPURenderer::Log("({}, {}) is not on line ({}, {}) with slope ({}, {})", x, y, endX, endY, line.x, line.y);
+		//CPURenderer::Log("({}, {}) is not on line ({}, {}) with slope ({}, {})", x, y, endX, endY, line.x, line.y);
 	}
 	
 	if (x < WIDTH && y < HEIGHT && x >= 0 && y >= 0 && isOnLine) {
@@ -42,7 +42,7 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, cons
 }
 
 static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
-	CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
+	//CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
 
@@ -139,7 +139,7 @@ static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const int WIDTH, const
 static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
 	constexpr int points = 360;
 	float angle = 1.0f;
-	float radius = 50.0f;
+	float radius = 1.0f;
 
 	Vector2 centerPoint = { 0.0f, 0.0f };
 	Vector2 secondPoint = { 0.0f, centerPoint.y + radius };
@@ -200,7 +200,7 @@ int main() {
 	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
 	DrawTriangle(triangle2, frameBuffer, WIDTH, HEIGHT);*/
 
-	DrawCircle(Circle2D::Create({ 500.0f, 500.0f }, { 1.0f, 1.0f }), frameBuffer, WIDTH, HEIGHT);
+	DrawCircle(Circle2D::Create({ WIDTH * 0.5f, HEIGHT * 0.5f }, { 50.0f, 50.0f }), frameBuffer, WIDTH, HEIGHT);
 
 	SDL_UpdateTexture(texture, nullptr, frameBuffer, WIDTH * sizeof(uint32_t));
 
