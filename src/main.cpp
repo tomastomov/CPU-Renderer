@@ -27,7 +27,7 @@ struct Circle2D {
 	}
 };
 
-static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT, Vector2 end, Vector2 line) {
+static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& config, Vector2 end, Vector2 line) {
 	int endX = std::floor(end.x);
 	int endY = std::floor(end.y);
 
@@ -37,14 +37,14 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const int WIDTH, cons
 		//CPURenderer::Log("({}, {}) is not on line ({}, {}) with slope ({}, {})", x, y, endX, endY, line.x, line.y);
 	}
 	
-	if (x < WIDTH && y < HEIGHT && x >= 0 && y >= 0 && isOnLine) {
-		int frameBufferIndex = y * WIDTH + x;
+	if (x < config.WIDTH && y < config.HEIGHT && x >= 0 && y >= 0 && isOnLine) {
+		int frameBufferIndex = y * config.WIDTH + x;
 
 		frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
 	}
 }
 
-static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDTH, const int HEIGHT) {
+static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConfig& config) {
 	//CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
@@ -63,10 +63,10 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const int WIDT
 		start.x += normalizedLine.x;
 		start.y += normalizedLine.y;
 
-		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
-		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
-		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
-		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, WIDTH, HEIGHT, end, normalizedLine);
+		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine);
+		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine);
+		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine);
+		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine);
 
 		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x: start.x >= end.x;
 		yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
@@ -110,9 +110,9 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 
 	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 
-	DrawLine(a, b, frameBuffer, config.WIDTH, config.HEIGHT);
-	DrawLine(a, c, frameBuffer, config.WIDTH, config.HEIGHT);
-	DrawLine(b, c, frameBuffer, config.WIDTH, config.HEIGHT);
+	DrawLine(a, b, frameBuffer, config);
+	DrawLine(a, c, frameBuffer, config);
+	DrawLine(b, c, frameBuffer, config);
 
 	while (keepDrawing) {
 		a.x += caLine.x;
@@ -121,7 +121,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 		b.x += cbLine.x;
 		b.y += cbLine.y;
 			
-		DrawLine(a, b, frameBuffer, config.WIDTH, config.HEIGHT);
+		DrawLine(a, b, frameBuffer, config);
 
 		keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 	}
