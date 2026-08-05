@@ -15,8 +15,6 @@ using CPURenderer::GameConfig;
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
 
-
-
 static uint32_t GetColorFromARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 	return ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
@@ -348,16 +346,22 @@ int main() {
 				if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
 					running = false;
 				}
+				if (event.key.scancode == SDL_SCANCODE_D) {
+					triangle.pos.x += 100.0f;
+				}
+				if (event.key.scancode == SDL_SCANCODE_A) {
+					triangle.pos.x -= 100.0f;
+				}
 			}
 			else if (event.type == SDL_EVENT_QUIT) {
 				running = false;
 			}
 		}
 
-		/*DrawTriangle(triangle, frameBuffer, config);
-		DrawTriangle(triangle2, frameBuffer, config);*/
+		DrawTriangle(triangle, frameBuffer, config);
+		DrawTriangle(triangle2, frameBuffer, config);
 
-		DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
+		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
 		SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
