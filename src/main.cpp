@@ -273,6 +273,9 @@ static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& conf
 }
 
 static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig& config) {
+	static constexpr float degreesToRadians =
+		std::numbers::pi_v<float> / 180.0f;
+
 	constexpr int points = 360;
 	float angle = 1.0f;
 	float radius = 1.0f;
@@ -282,8 +285,8 @@ static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig&
 	Vector2 prevPoint = secondPoint;
 
 	for (int i = 0; i < 360; i++) {
-		float s = std::sin(angle);
-		float c = std::cos(angle);
+		float s = std::sin(angle * degreesToRadians);
+		float c = std::cos(angle * degreesToRadians);
 		Vector2 thirdPoint = { secondPoint.x * c - s * secondPoint.y, secondPoint.x * s + secondPoint.y * c };
 		Triangle2D triangle = Triangle2D::Create(centerPoint, prevPoint, thirdPoint, circle.center, circle.size, 0.0f);
 		DrawTriangle(triangle, frameBuffer, config);
@@ -351,10 +354,10 @@ int main() {
 			}
 		}
 
-		DrawTriangle(triangle, frameBuffer, config);
-		DrawTriangle(triangle2, frameBuffer, config);
+		/*DrawTriangle(triangle, frameBuffer, config);
+		DrawTriangle(triangle2, frameBuffer, config);*/
 
-		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
+		DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
 		SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
