@@ -160,7 +160,7 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 
 	bool isInsideWorld = x < config.WIDTH && y < config.HEIGHT && x >= 0 && y >= 0 && isOnLine;
 	bool isInsideViewPort = x < config.VIEWPORT_WIDTH && y < config.VIEWPORT_HEIGHT && x >= 0 && y >= 0;
-	
+
 	if (isInsideWorld && isInsideViewPort) {
 		int frameBufferIndex = y * config.WIDTH + x;
 
@@ -192,7 +192,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConf
 		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData);
 		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData);
 
-		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x: start.x >= end.x;
+		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x : start.x >= end.x;
 		yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
 		//CPURenderer::Log("Drawing pixel point x: {}, y: {} at screen location {}", startX, startY, frameBufferIndex);
 	}
@@ -212,7 +212,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 	}
 
 	Matrix3x3 viewportProjectionMatrix = Matrix3x3::GetScaled({ config.VIEWPORT_WIDTH * 0.5f , config.VIEWPORT_HEIGHT * 0.5f }) * Matrix3x3::GetTranslated({ 1.0f, 1.0f });
-	Matrix3x3 ndsProjectionMatrix = Matrix3x3::GetTranslated({ -1.0f, -1.0f }) * Matrix3x3::GetScaled({ 2.0f / config.WIDTH, 2.0f / config.HEIGHT});
+	Matrix3x3 ndsProjectionMatrix = Matrix3x3::GetTranslated({ -1.0f, -1.0f }) * Matrix3x3::GetScaled({ 2.0f / config.WIDTH, 2.0f / config.HEIGHT });
 	Matrix3x3 transform = Matrix3x3::GetTranslated(triangle.pos) * Matrix3x3::GetRotated(triangle.rotate) * Matrix3x3::GetScaled(triangle.size);
 	Matrix3x3 projection = viewportProjectionMatrix * ndsProjectionMatrix * transform;
 
@@ -230,7 +230,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 
 	auto hasNotReachedLineEnd = [](Vector2 line, Vector2 a, Vector2 b) -> bool {
 		return (line.x >= 0.0f ? a.x <= b.x : a.x >= b.x) && (line.y >= 0.0f ? a.y <= b.y : a.y >= b.y);
-	};
+		};
 
 	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 
@@ -291,7 +291,7 @@ static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig&
 		angle += 1.0f;
 	}
 }
-	
+
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		CPURenderer::Log("Failed to init sdl video");
@@ -326,15 +326,10 @@ int main() {
 	Vector2 topRight = { 0.5f, 0.5f };
 
 	//Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH), static_cast<float>(config.VIEWPORT_HEIGHT) }, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
-	Quad2D quad = Quad2D::Create({910, 540}, { 400.0f, 400.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3 });
+	//Quad2D quad = Quad2D::Create({910, 540}, { 400.0f, 400.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3 });
 
-	/*Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
+	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
 	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);
-
-	DrawTriangle(triangle, frameBuffer, WIDTH, HEIGHT);
-	DrawTriangle(triangle2, frameBuffer, WIDTH, HEIGHT);*/
-
-	//DrawCircle(Circle2D::Create({ WIDTH * 0.5f, HEIGHT * 0.5f }, { 50.0f, 50.0f }), frameBuffer, WIDTH, HEIGHT);
 
 	SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
@@ -355,8 +350,11 @@ int main() {
 				running = false;
 			}
 		}
-		
-		DrawQuad(quad, frameBuffer, config);
+
+		DrawTriangle(triangle, frameBuffer, config);
+		DrawTriangle(triangle2, frameBuffer, config);
+
+		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
 		SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
