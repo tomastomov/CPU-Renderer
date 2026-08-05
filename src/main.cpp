@@ -6,6 +6,7 @@
 #include <Quad2D.h>
 #include <Triangle2D.h>
 #include <GameConfig.h>
+#include <assert.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
@@ -27,7 +28,86 @@ struct Circle2D {
 	}
 };
 
-static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& config, Vector2 end, Vector2 line) {
+static double FindAngleByCosineLaw(
+	double adjacentA,
+	double adjacentB,
+	double opposite)
+{
+	assert(adjacentA > 0.0);
+	assert(adjacentB > 0.0);
+
+	double cosine =
+		(adjacentA * adjacentA +
+			adjacentB * adjacentB -
+			opposite * opposite)
+		/ (2.0 * adjacentA * adjacentB);
+
+	cosine = std::clamp(cosine, -1.0, 1.0);
+
+	return std::acos(cosine);
+}
+
+static bool IsPointInsideTriangle(
+	Vector2 point,
+	Vector2 a,
+	Vector2 b,
+	Vector2 c)
+{
+	const double ab = (a - b).GetLength();
+	const double ac = (a - c).GetLength();
+	const double bc = (b - c).GetLength();
+
+	constexpr double distanceEpsilon = 1e-4;
+
+	if (ab <= distanceEpsilon ||
+		ac <= distanceEpsilon ||
+		bc <= distanceEpsilon)
+	{
+		return false;
+	}
+
+	const double ha = (a - point).GetLength();
+	const double hb = (b - point).GetLength();
+	const double hc = (c - point).GetLength();
+
+	if (ha <= distanceEpsilon ||
+		hb <= distanceEpsilon ||
+		hc <= distanceEpsilon)
+	{
+		return true;
+	}
+
+	const double bacAngle = FindAngleByCosineLaw(ab, ac, bc);
+	const double abcAngle = FindAngleByCosineLaw(ab, bc, ac);
+	const double bcaAngle = FindAngleByCosineLaw(ac, bc, ab);
+
+	constexpr double angleEpsilon = 1e-2;
+
+	const double hcbAngle = FindAngleByCosineLaw(bc, hc, hb);
+	const double hcaAngle = FindAngleByCosineLaw(hc, ac, ha);
+
+	double differenceA = (hcbAngle + hcaAngle) - bcaAngle;
+
+	if ((hcbAngle + hcaAngle) - bcaAngle > angleEpsilon) {
+		return false;
+	}
+
+	const double abhAngle = FindAngleByCosineLaw(ab, hb, ha);
+	const double cbhAngle = FindAngleByCosineLaw(bc, hb, hc);
+
+	if (abhAngle + cbhAngle > abcAngle + angleEpsilon)
+		return false;
+
+	const double habAngle = FindAngleByCosineLaw(ha, ab, hb);
+	const double hacAngle = FindAngleByCosineLaw(ac, ha, hc);
+
+	if (habAngle + hacAngle > bacAngle + angleEpsilon)
+		return false;
+
+	return true;
+}
+
+static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& config, Vector2 end, Vector2 line, const Triangle2D& triangle) {
 	int endX = std::floor(end.x);
 	int endY = std::floor(end.y);
 
@@ -35,6 +115,12 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 
 	if (!isOnLine) {
 		//CPURenderer::Log("({}, {}) is not on line ({}, {}) with slope ({}, {})", x, y, endX, endY, line.x, line.y);
+		return;
+	}
+
+	Vector2 p = { static_cast<float>(x), static_cast<float>(y) };
+
+	if (!IsPointInsideTriangle(p, triangle.a, triangle.b, triangle.c)) {
 		return;
 	}
 
@@ -48,7 +134,7 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 	}
 }
 
-static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConfig& config) {
+static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConfig& config, const Triangle2D& triangle) {
 	//CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
@@ -67,10 +153,10 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConf
 		start.x += normalizedLine.x;
 		start.y += normalizedLine.y;
 
-		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine);
-		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine);
-		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine);
-		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine);
+		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangle);
+		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangle);
+		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangle);
+		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangle);
 
 		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x: start.x >= end.x;
 		yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
@@ -114,20 +200,26 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 
 	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 
-	DrawLine(a, b, frameBuffer, config);
-	DrawLine(a, c, frameBuffer, config);
-	DrawLine(b, c, frameBuffer, config);
+	Triangle2D normalizedTriangle = Triangle2D::Create(a, b, c, triangle.pos, triangle.size, triangle.rotate);
+
+	DrawLine(a, b, frameBuffer, config, normalizedTriangle);
+	DrawLine(a, c, frameBuffer, config, normalizedTriangle);
+	DrawLine(b, c, frameBuffer, config, normalizedTriangle);
+
+	Vector2 tempA = a;
+	Vector2 tempB = b;
+	Vector2 tempC = c;
 
 	while (keepDrawing) {
-		a.x += caLine.x;
-		a.y += caLine.y;
+		tempA.x += caLine.x;
+		tempA.y += caLine.y;
 
-		b.x += cbLine.x;
-		b.y += cbLine.y;
-			
-		DrawLine(a, b, frameBuffer, config);
+		tempB.x += cbLine.x;
+		tempB.y += cbLine.y;
 
-		keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
+		DrawLine(tempA, tempB, frameBuffer, config, normalizedTriangle);
+
+		keepDrawing = hasNotReachedLineEnd(caLine, tempA, c) && hasNotReachedLineEnd(cbLine, tempB, c);
 	}
 
 	return;
@@ -200,7 +292,7 @@ int main() {
 	Vector2 topRight = { 0.5f, 0.5f };
 
 	//Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH), static_cast<float>(config.VIEWPORT_HEIGHT) }, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
-	Quad2D quad = Quad2D::Create({1920, 1080}, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3 });
+	Quad2D quad = Quad2D::Create({910, 540}, { 10.0f, 10.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3 });
 
 	/*Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { WIDTH * 0.5f, HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
 	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);

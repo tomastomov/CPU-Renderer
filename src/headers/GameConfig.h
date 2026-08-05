@@ -5,7 +5,7 @@ namespace CPURenderer {
 		const int WIDTH = 1920;
 		const int HEIGHT = 1080;
 
-		const int VIEWPORT_WIDTH = 1280;
-		const int VIEWPORT_HEIGHT = 720;
+		const int VIEWPORT_WIDTH = 1920;
+		const int VIEWPORT_HEIGHT = 1080;
 	};
 }
