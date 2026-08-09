@@ -13,4 +13,12 @@ namespace CPURenderer {
 	{
 		stbi_image_free(_data);
 	}
+	int Texture::GetWidth()
+	{
+		return _width;
+	}
+	int Texture::GetHeight()
+	{
+		return _height;
+	}
 }

@@ -10,5 +10,8 @@ namespace CPURenderer {
 	public:
 		Texture(const char* path);
 		~Texture();
+
+		int GetWidth();
+		int GetHeight();
 	};
 }
