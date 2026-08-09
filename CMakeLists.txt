@@ -9,7 +9,7 @@ if(DEFINED ENV{VCPKG_ROOT})
 endif()
 
 project(CPU-Renderer LANGUAGES CXX)
-add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h" "src/headers/Vector2.h" "src/Vector2.cpp"   "src/headers/Matrix3x3.h" "src/Matrix3x3.cpp" "src/headers/Quad2D.h" "src/headers/Triangle2D.h" "src/headers/GameConfig.h")
+add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h" "src/headers/Vector2.h" "src/Vector2.cpp"   "src/headers/Matrix3x3.h" "src/Matrix3x3.cpp" "src/headers/Quad2D.h" "src/headers/Triangle2D.h" "src/headers/GameConfig.h" "src/headers/external/stb_image.h" "src/headers/Texture.h" "src/Texture.cpp")
 
 target_compile_features(CPU-Renderer PRIVATE cxx_std_20)
 
@@ -20,3 +20,9 @@ target_link_libraries(CPU-Renderer PRIVATE SDL3::SDL3)
 target_include_directories(CPU-Renderer PRIVATE src/headers)
 
 target_precompile_headers(CPU-Renderer PRIVATE src/headers/pch.h)
+
+add_custom_command(TARGET CPU-Renderer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/src/resources"
+    "$<TARGET_FILE_DIR:CPU-Renderer>/resources"
+)

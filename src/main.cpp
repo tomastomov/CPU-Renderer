@@ -7,10 +7,12 @@
 #include <Triangle2D.h>
 #include <GameConfig.h>
 #include <assert.h>
+#include <Texture.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
 using CPURenderer::GameConfig;
+using CPURenderer::Texture;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
@@ -139,7 +141,7 @@ static bool IsPointInsideTriangle(TriangleAngleData& triangleAngleData, Vector2 
 	return true;
 }
 
-static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& config, Vector2 end, Vector2 line, TriangleAngleData& triangleAngleData) {
+static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& config, Vector2 end, Vector2 line, TriangleAngleData& triangleAngleData, Texture& texture) {
 	int endX = std::floor(end.x);
 	int endY = std::floor(end.y);
 
@@ -162,11 +164,13 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 	if (isInsideWorld && isInsideViewPort) {
 		int frameBufferIndex = y * config.WIDTH + x;
 
+		uint32_t color = GetColorFromARGB(255, 0, 0, 255);
+
 		frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
 	}
 }
 
-static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConfig& config, TriangleAngleData& triangleAngleData) {
+static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConfig& config, TriangleAngleData& triangleAngleData, Texture& texture) {
 	//CPURenderer::Log("Processing point x: {}, y: {} and x1: {}, y1: {} ", a.x, a.y, b.x, b.y);
 	Vector2 line = b - a;
 	Vector2 normalizedLine = line.GetNormalized();
@@ -185,10 +189,10 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConf
 		start.x += normalizedLine.x;
 		start.y += normalizedLine.y;
 
-		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData);
-		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData);
-		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData);
-		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData);
+		DrawPixel(std::ceil(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData, texture);
+		DrawPixel(std::floor(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData, texture);
+		DrawPixel(std::ceil(start.x), std::floor(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData, texture);
+		DrawPixel(std::floor(start.x), std::ceil(start.y), frameBuffer, config, end, normalizedLine, triangleAngleData, texture);
 
 		xCondition = normalizedLine.x >= 0.0f ? start.x <= end.x : start.x >= end.x;
 		yCondition = normalizedLine.y >= 0.0f ? start.y <= end.y : start.y >= end.y;
@@ -196,7 +200,7 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConf
 	}
 }
 
-static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const GameConfig& config) {
+static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
 	double abLen = (triangle.b - triangle.a).GetLength();
 	double bcLen = (triangle.c - triangle.b).GetLength();
 	double caLen = (triangle.a - triangle.c).GetLength();
@@ -234,9 +238,9 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 
 	TriangleAngleData triangleAngleData = TriangleAngleData::CreateTriangleAngleData(a, b, c);
 
-	DrawLine(a, b, frameBuffer, config, triangleAngleData);
-	DrawLine(a, c, frameBuffer, config, triangleAngleData);
-	DrawLine(b, c, frameBuffer, config, triangleAngleData);
+	DrawLine(a, b, frameBuffer, config, triangleAngleData, texture);
+	DrawLine(a, c, frameBuffer, config, triangleAngleData, texture);
+	DrawLine(b, c, frameBuffer, config, triangleAngleData, texture);
 
 	Vector2 tempA = a;
 	Vector2 tempB = b;
@@ -249,7 +253,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 		tempB.x += cbLine.x;
 		tempB.y += cbLine.y;
 
-		DrawLine(tempA, tempB, frameBuffer, config, triangleAngleData);
+		DrawLine(tempA, tempB, frameBuffer, config, triangleAngleData, texture);
 
 		keepDrawing = hasNotReachedLineEnd(caLine, tempA, c) && hasNotReachedLineEnd(cbLine, tempB, c);
 	}
@@ -257,7 +261,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 	return;
 }
 
-static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config) {
+static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
 	auto& indeces = quad.indeces;
 	if (indeces.size() == 0 || indeces.size() % 3 != 0) {
 		CPURenderer::Log("Not enough indeces provided");
@@ -266,11 +270,11 @@ static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& conf
 
 	for (int i = 0; i < indeces.size(); i += 3) {
 		Triangle2D triangle = Triangle2D::Create(quad.points[indeces[i]], quad.points[indeces[i + 1]], quad.points[indeces[i + 2]], quad.pos, quad.size, quad.rotate);
-		DrawTriangle(triangle, frameBuffer, config);
+		DrawTriangle(triangle, frameBuffer, config, texture);
 	}
 }
 
-static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig& config) {
+static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
 	static constexpr float degreesToRadians =
 		std::numbers::pi_v<float> / 180.0f;
 
@@ -287,7 +291,7 @@ static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig&
 		float c = std::cos(angle * degreesToRadians);
 		Vector2 thirdPoint = { secondPoint.x * c - s * secondPoint.y, secondPoint.x * s + secondPoint.y * c };
 		Triangle2D triangle = Triangle2D::Create(centerPoint, prevPoint, thirdPoint, circle.center, circle.size, 0.0f);
-		DrawTriangle(triangle, frameBuffer, config);
+		DrawTriangle(triangle, frameBuffer, config, texture);
 		prevPoint = thirdPoint;
 		angle += 1.0f;
 	}
@@ -334,6 +338,8 @@ int main() {
 
 	SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
+	CPURenderer::Texture gorillaTexture("resources/gorilla.png");
+
 	bool running = true;
 
 	while (running) {
@@ -358,8 +364,7 @@ int main() {
 			}
 		}
 
-		DrawTriangle(triangle, frameBuffer, config);
-		DrawTriangle(triangle2, frameBuffer, config);
+		DrawTriangle(triangle, frameBuffer, config, gorillaTexture);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
