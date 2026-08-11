@@ -10,6 +10,8 @@ namespace CPURenderer {
 
         double GetLength();
 
+        double GetDistance(Vector2 other);
+
         Vector2 GetNormalized();
 
         Vector2 operator-(const Vector2 other);

@@ -9,7 +9,7 @@ if(DEFINED ENV{VCPKG_ROOT})
 endif()
 
 project(CPU-Renderer LANGUAGES CXX)
-add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h" "src/headers/Vector2.h" "src/Vector2.cpp"   "src/headers/Matrix3x3.h" "src/Matrix3x3.cpp" "src/headers/Quad2D.h" "src/headers/Triangle2D.h" "src/headers/GameConfig.h" "src/headers/external/stb_image.h" "src/headers/Texture.h" "src/Texture.cpp" "src/headers/Pixel.h")
+add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h" "src/headers/Vector2.h" "src/Vector2.cpp"   "src/headers/Matrix3x3.h" "src/Matrix3x3.cpp" "src/headers/Quad2D.h" "src/headers/Triangle2D.h" "src/headers/GameConfig.h" "src/headers/external/stb_image.h" "src/headers/Texture.h" "src/Texture.cpp" "src/headers/Pixel.h" "src/headers/Vertex2.h")
 
 target_compile_features(CPU-Renderer PRIVATE cxx_std_20)
 

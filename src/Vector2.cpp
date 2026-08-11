@@ -11,6 +11,17 @@ namespace CPURenderer {
         return std::sqrt(xSquared + ySquared);
     }
 
+    double Vector2::GetDistance(Vector2 other)
+    {
+        double xDelta = x - other.x;
+        double yDelta = y - other.y;
+
+        double xSquared = xDelta * xDelta;
+        double ySquared = yDelta * yDelta;
+
+        return std::sqrt(xSquared + ySquared);
+    }
+
     Vector2 Vector2::GetNormalized()
     {
         double length = GetLength();

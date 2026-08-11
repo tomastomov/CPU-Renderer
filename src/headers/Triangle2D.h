@@ -1,16 +1,19 @@
 #pragma once
 
+#include <Vertex2.h>
 #include <Vector2.h>
 
-struct Triangle2D {
-	CPURenderer::Vector2 a;
-	CPURenderer::Vector2 b;
-	CPURenderer::Vector2 c;
-	CPURenderer::Vector2 pos;
-	CPURenderer::Vector2 size;
-	float rotate;
+namespace CPURenderer {
+	struct Triangle2D {
+		Vertex2 a;
+		Vertex2 b;
+		Vertex2 c;
+		Vector2 pos;
+		Vector2 size;
+		float rotate;
 
-	static Triangle2D Create(CPURenderer::Vector2 a, CPURenderer::Vector2 b, CPURenderer::Vector2 c, CPURenderer::Vector2 pos, CPURenderer::Vector2 size, float rotate) {
-		return Triangle2D(a, b, c, pos, size, rotate);
-	}
-};
+		static Triangle2D Create(Vertex2 a, Vertex2 b, Vertex2 c, Vector2 pos, Vector2 size, float rotate) {
+			return Triangle2D(a, b, c, pos, size, rotate);
+		}
+	};
+}

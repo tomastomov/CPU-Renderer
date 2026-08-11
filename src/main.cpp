@@ -8,11 +8,15 @@
 #include <GameConfig.h>
 #include <assert.h>
 #include <Texture.h>
+#include <Vertex2.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
 using CPURenderer::GameConfig;
 using CPURenderer::Texture;
+using CPURenderer::Vertex2;
+using CPURenderer::Triangle2D;
+using CPURenderer::Quad2D;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
@@ -50,9 +54,9 @@ static double FindAngleByCosineLaw(
 }
 
 struct TriangleAngleData {
-	Vector2 a;
-	Vector2 b;
-	Vector2 c;
+	Vertex2 a;
+	Vertex2 b;
+	Vertex2 c;
 
 	double ab;
 	double ac;
@@ -63,9 +67,9 @@ struct TriangleAngleData {
 	double angleC;
 
 	static TriangleAngleData CreateTriangleAngleData(
-		Vector2 a,
-		Vector2 b,
-		Vector2 c)
+		Vertex2 a,
+		Vertex2 b,
+		Vertex2 c)
 	{
 		TriangleAngleData data{};
 
@@ -73,9 +77,9 @@ struct TriangleAngleData {
 		data.b = b;
 		data.c = c;
 
-		data.ab = (a - b).GetLength();
-		data.ac = (a - c).GetLength();
-		data.bc = (b - c).GetLength();
+		data.ab = (a.vector - b.vector).GetLength();
+		data.ac = (a.vector - c.vector).GetLength();
+		data.bc = (b.vector - c.vector).GetLength();
 
 		data.angleA = FindAngleByCosineLaw(data.ab, data.ac, data.bc);
 		data.angleB = FindAngleByCosineLaw(data.ab, data.bc, data.ac);
@@ -87,9 +91,9 @@ struct TriangleAngleData {
 
 static bool IsPointInsideTriangle(TriangleAngleData& triangleAngleData, Vector2 point)
 {
-	const double ab = (triangleAngleData.a - triangleAngleData.b).GetLength();
-	const double ac = (triangleAngleData.a - triangleAngleData.c).GetLength();
-	const double bc = (triangleAngleData.b - triangleAngleData.c).GetLength();
+	const double ab = (triangleAngleData.a.vector - triangleAngleData.b.vector).GetLength();
+	const double ac = (triangleAngleData.a.vector - triangleAngleData.c.vector).GetLength();
+	const double bc = (triangleAngleData.b.vector - triangleAngleData.c.vector).GetLength();
 
 	constexpr double distanceEpsilon = 1e-4;
 
@@ -100,9 +104,9 @@ static bool IsPointInsideTriangle(TriangleAngleData& triangleAngleData, Vector2 
 		return false;
 	}
 
-	const double ha = (triangleAngleData.a - point).GetLength();
-	const double hb = (triangleAngleData.b - point).GetLength();
-	const double hc = (triangleAngleData.c - point).GetLength();
+	const double ha = (triangleAngleData.a.vector - point).GetLength();
+	const double hb = (triangleAngleData.b.vector - point).GetLength();
+	const double hc = (triangleAngleData.c.vector - point).GetLength();
 
 	if (ha <= distanceEpsilon ||
 		hb <= distanceEpsilon ||
@@ -141,6 +145,33 @@ static bool IsPointInsideTriangle(TriangleAngleData& triangleAngleData, Vector2 
 	return true;
 }
 
+static std::pair<float, float> GetUVWeights(const Vertex2& a, const Vertex2& b, const Vertex2& c, Vector2 h) {
+	double ah = h.GetDistance(a.vector);
+	double bh = h.GetDistance(b.vector);
+	double ch = h.GetDistance(c.vector);
+
+	double total = ah + bh + ch;
+
+	double a1 = 1.0 - (ah / total);
+	double b1 = 1.0 - (bh / total);
+	double c1 = 1.0 - (ch / total);
+
+	total = a1 + b1 + c1;
+
+	a1 = a1 / total;
+	b1 = b1 / total;
+	c1 = c1 / total;
+
+	if (a1 > 1.0 || b1 > 1.0 || c1 > 1.0 || a1 < 0.0 || b1 < 0.0 || c1 < 0.0) {
+		CPURenderer::Log("a: {}, b: {},  c1: {}", a1, b1, c1);
+	}
+
+	float u = a1 * a.u + b1 * b.u + c1 * c.u;
+	float v = a1 * a.v + b1 * b.v + c1 * c.v;
+
+	return { u, v };
+}
+
 static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& config, Vector2 end, Vector2 line, TriangleAngleData& triangleAngleData, Texture& texture) {
 	int endX = std::floor(end.x);
 	int endY = std::floor(end.y);
@@ -164,9 +195,11 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 	if (isInsideWorld && isInsideViewPort) {
 		int frameBufferIndex = y * config.WIDTH + x;
 
-		uint32_t color = GetColorFromARGB(255, 0, 0, 255);
+		auto uvWeights = GetUVWeights(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, p);
 
-		frameBuffer[frameBufferIndex] = GetColorFromARGB(255, 0, 0, 255);
+		Pixel pixel = texture.GetPixel(uvWeights.first * (texture.GetWidth() - 1), uvWeights.second * (texture.GetHeight() - 1));
+
+		frameBuffer[frameBufferIndex] = GetColorFromARGB(pixel.a, pixel.r, pixel.g, pixel.b);
 	}
 }
 
@@ -201,9 +234,9 @@ static void DrawLine(Vector2 a, Vector2 b, uint32_t* frameBuffer, const GameConf
 }
 
 static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
-	double abLen = (triangle.b - triangle.a).GetLength();
-	double bcLen = (triangle.c - triangle.b).GetLength();
-	double caLen = (triangle.a - triangle.c).GetLength();
+	double abLen = (triangle.b.vector - triangle.a.vector).GetLength();
+	double bcLen = (triangle.c.vector - triangle.b.vector).GetLength();
+	double caLen = (triangle.a.vector - triangle.c.vector).GetLength();
 
 	if (abLen + bcLen <= caLen ||
 		abLen + caLen <= bcLen ||
@@ -218,9 +251,9 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 	Matrix3x3 transform = Matrix3x3::GetTranslated(triangle.pos) * Matrix3x3::GetRotated(triangle.rotate) * Matrix3x3::GetScaled(triangle.size);
 	Matrix3x3 projection = viewportProjectionMatrix * ndsProjectionMatrix * transform;
 
-	Vector2 a = triangle.a;
-	Vector2 b = triangle.b;
-	Vector2 c = triangle.c;
+	Vector2 a = triangle.a.vector;
+	Vector2 b = triangle.b.vector;
+	Vector2 c = triangle.c.vector;
 
 	a = projection * a;
 	b = projection * b;
@@ -236,7 +269,7 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 
 	bool keepDrawing = hasNotReachedLineEnd(caLine, a, c) && hasNotReachedLineEnd(cbLine, b, c);
 
-	TriangleAngleData triangleAngleData = TriangleAngleData::CreateTriangleAngleData(a, b, c);
+	TriangleAngleData triangleAngleData = TriangleAngleData::CreateTriangleAngleData({ a, triangle.a.u, triangle.a.v }, { b, triangle.b.u, triangle.b.v }, { c, triangle.c.u, triangle.c.v });
 
 	DrawLine(a, b, frameBuffer, config, triangleAngleData, texture);
 	DrawLine(a, c, frameBuffer, config, triangleAngleData, texture);
@@ -274,28 +307,28 @@ static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& conf
 	}
 }
 
-static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
-	static constexpr float degreesToRadians =
-		std::numbers::pi_v<float> / 180.0f;
-
-	constexpr int points = 360;
-	float angle = 1.0f;
-	float radius = 1.0f;
-
-	Vector2 centerPoint = { 0.0f, 0.0f };
-	Vector2 secondPoint = { 0.0f, centerPoint.y + radius };
-	Vector2 prevPoint = secondPoint;
-
-	for (int i = 0; i < 360; i++) {
-		float s = std::sin(angle * degreesToRadians);
-		float c = std::cos(angle * degreesToRadians);
-		Vector2 thirdPoint = { secondPoint.x * c - s * secondPoint.y, secondPoint.x * s + secondPoint.y * c };
-		Triangle2D triangle = Triangle2D::Create(centerPoint, prevPoint, thirdPoint, circle.center, circle.size, 0.0f);
-		DrawTriangle(triangle, frameBuffer, config, texture);
-		prevPoint = thirdPoint;
-		angle += 1.0f;
-	}
-}
+//static void DrawCircle(Circle2D circle, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
+//	static constexpr float degreesToRadians =
+//		std::numbers::pi_v<float> / 180.0f;
+//
+//	constexpr int points = 360;
+//	float angle = 1.0f;
+//	float radius = 1.0f;
+//
+//	Vector2 centerPoint = { 0.0f, 0.0f };
+//	Vector2 secondPoint = { 0.0f, centerPoint.y + radius };
+//	Vector2 prevPoint = secondPoint;
+//
+//	for (int i = 0; i < 360; i++) {
+//		float s = std::sin(angle * degreesToRadians);
+//		float c = std::cos(angle * degreesToRadians);
+//		Vector2 thirdPoint = { secondPoint.x * c - s * secondPoint.y, secondPoint.x * s + secondPoint.y * c };
+//		Triangle2D triangle = Triangle2D::Create(centerPoint, prevPoint, thirdPoint, circle.center, circle.size, 0.0f);
+//		DrawTriangle(triangle, frameBuffer, config, texture);
+//		prevPoint = thirdPoint;
+//		angle += 1.0f;
+//	}
+//}
 
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -330,11 +363,11 @@ int main() {
 	Vector2 bottomRight = { 0.5f, -0.5f };
 	Vector2 topRight = { 0.5f, 0.5f };
 
-	//Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH), static_cast<float>(config.VIEWPORT_HEIGHT) }, { 800.0f, 800.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3});
+	Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH) * 0.5f, static_cast<float>(config.VIEWPORT_HEIGHT) * 0.5f }, { 800.0f, 800.0f }, 0.0f, { { bottomLeft, 0.0f, 0.0f }, { topLeft, 0.0f, 1.0f }, { bottomRight, 1.0f, 0.0f }, { topRight, 1.0f, 1.0f} }, { 0, 1, 2, 1, 2, 3 });
 	//Quad2D quad = Quad2D::Create({910, 540}, { 400.0f, 400.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3 });
 
-	Triangle2D triangle = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 500.0f, 500.0f }, 10.0f);
-	Triangle2D triangle2 = Triangle2D::Create(bottomLeft, bottomRight, topLeft, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);
+	Triangle2D triangle = Triangle2D::Create({ bottomLeft, 0.0f, 0.0f }, { bottomRight, 1.0f, 0.0f }, { topLeft, 0.0f, 1.0f }, {config.WIDTH * 0.5f, config.HEIGHT * 0.5f}, {500.0f, 500.0f}, 10.0f);
+	Triangle2D triangle2 = Triangle2D::Create({ bottomLeft, 0.0f, 0.0f }, { bottomRight, 1.0f, 0.0f }, { topLeft, 0.0f, 1.0f }, { 200.0f, 200.0f }, { 10.0f, 10.0f }, 0.0f);
 
 	SDL_UpdateTexture(texture, nullptr, frameBuffer, config.WIDTH * sizeof(uint32_t));
 
@@ -364,7 +397,14 @@ int main() {
 			}
 		}
 
-		DrawTriangle(triangle, frameBuffer, config, gorillaTexture);
+		DrawQuad(quad, frameBuffer, config, gorillaTexture);
+
+		for (int i = 0; i < gorillaTexture.GetWidth(); i++) {
+			for (int j = 0; j < gorillaTexture.GetHeight(); j++) {
+				Pixel p = gorillaTexture.GetPixel(i, j);
+				frameBuffer[j * config.WIDTH + i] = GetColorFromARGB(p.a, p.r, p.g, p.b);
+			}
+		}
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
