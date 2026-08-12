@@ -145,22 +145,65 @@ static bool IsPointInsideTriangle(TriangleAngleData& triangleAngleData, Vector2 
 	return true;
 }
 
-static std::pair<float, float> GetUVWeights(const Vertex2& a, const Vertex2& b, const Vertex2& c, Vector2 h) {
+static std::pair<float, float> GetUVWeightsFast(
+	const Vertex2& a,
+	const Vertex2& b,
+	const Vertex2& c,
+	Vector2 h)
+{
+	const float denom =
+		(b.vector.y - c.vector.y) * (a.vector.x - c.vector.x) +
+		(c.vector.x - b.vector.x) * (a.vector.y - c.vector.y);
+
+	if (std::abs(denom) < 0.000001f)
+		return { 0.0f, 0.0f };
+
+	const float wa =
+		((b.vector.y - c.vector.y) * (h.x - c.vector.x) +
+			(c.vector.x - b.vector.x) * (h.y - c.vector.y))
+		/ denom;
+
+	const float wb =
+		((c.vector.y - a.vector.y) * (h.x - c.vector.x) +
+			(a.vector.x - c.vector.x) * (h.y - c.vector.y))
+		/ denom;
+
+	const float wc = 1.0f - wa - wb;
+
+	const float u =
+		wa * a.u +
+		wb * b.u +
+		wc * c.u;
+
+	const float v =
+		wa * a.v +
+		wb * b.v +
+		wc * c.v;
+
+	return { u, v };
+}
+
+
+static double GetDistanceToOppositeSide(double ad1, double ad2, double opposite) {
+	double ad1Sq = ad1 * ad1;
+	double p = ((opposite * opposite) + (ad1Sq)-(ad2 * ad2)) / (2.0 * opposite);
+	return std::sqrt(ad1Sq - (p * p));
+}
+
+static std::pair<float, float> GetUVWeights(Vertex2& a, Vertex2& b, Vertex2& c, Vector2 h) {
 	double ah = h.GetDistance(a.vector);
 	double bh = h.GetDistance(b.vector);
 	double ch = h.GetDistance(c.vector);
 
-	double total = ah + bh + ch;
+	double distB = GetDistanceToOppositeSide(ah, ch, (a.vector - c.vector).GetLength());
+	double distC = GetDistanceToOppositeSide(ah, bh, (a.vector - b.vector).GetLength());
+	double distA = GetDistanceToOppositeSide(ch, bh, (b.vector - c.vector).GetLength());
 
-	double a1 = 1.0 - (ah / total);
-	double b1 = 1.0 - (bh / total);
-	double c1 = 1.0 - (ch / total);
+	double total = distA + distB + distC;
 
-	total = a1 + b1 + c1;
-
-	a1 = a1 / total;
-	b1 = b1 / total;
-	c1 = c1 / total;
+	double a1 = distA / total;
+	double b1 = distB / total;
+	double c1 = distC / total;
 
 	if (a1 > 1.0 || b1 > 1.0 || c1 > 1.0 || a1 < 0.0 || b1 < 0.0 || c1 < 0.0) {
 		CPURenderer::Log("a: {}, b: {},  c1: {}", a1, b1, c1);
@@ -188,6 +231,14 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 	if (!IsPointInsideTriangle(triangleAngleData, p)) {
 		return;
 	}
+
+	Vertex2 testA = { {5.0f, 5.0f}, 0.0f, 0.0f };
+	Vertex2 testB = { {5.0f, 10.0f}, 0.0f, 1.0f};
+	Vertex2 testC = { {10.0f, 5.0f}, 1.0f, 0.0f};
+
+	GetUVWeights(testA, testB, testC, { 5.0f, 7.5f });
+	//GetUVWeights(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, { 560.0f, 540.0f});
+	GetUVWeightsFast(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, { 560.0f, 540.0f });
 
 	bool isInsideWorld = x < config.WIDTH && y < config.HEIGHT && x >= 0 && y >= 0 && isOnLine;
 	bool isInsideViewPort = x < config.VIEWPORT_WIDTH && y < config.VIEWPORT_HEIGHT && x >= 0 && y >= 0;
@@ -387,9 +438,11 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_D) {
 					triangle.pos.x += 100.0f;
+					quad.pos.x += 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_A) {
 					triangle.pos.x -= 100.0f;
+					quad.pos.x -= 100.0f;
 				}
 			}
 			else if (event.type == SDL_EVENT_QUIT) {
