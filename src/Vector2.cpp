@@ -44,6 +44,11 @@ namespace CPURenderer {
         return Vector2(x * value, y * value);
     }
 
+    float Vector2::Cross(Vector2 other)
+    {
+        return x * other.y - y * other.x;
+    }
+
     bool Vector2::operator==(const Vector2 other)
     {
         return x == other.x && y == other.y;

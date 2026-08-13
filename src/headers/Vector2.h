@@ -18,6 +18,8 @@ namespace CPURenderer {
 
         Vector2 operator*(const float value);
 
+        float Cross(Vector2 other);
+
         bool operator==(const Vector2 other);
 
         void Print();
