@@ -288,7 +288,7 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 	if (isInsideWorld && isInsideViewPort) {
 		int frameBufferIndex = y * config.WIDTH + x;
 
-		auto uvWeights = GetUVWeights(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, p);
+		auto uvWeights = GetUVWeightsFast(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, p);
 
 		Pixel pixel = texture.GetPixel(uvWeights.first * (texture.GetWidth() - 1), uvWeights.second * (texture.GetHeight() - 1));
 
@@ -456,7 +456,7 @@ int main() {
 	Vector2 bottomRight = { 0.5f, -0.5f };
 	Vector2 topRight = { 0.5f, 0.5f };
 
-	Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH) * 0.5f, static_cast<float>(config.VIEWPORT_HEIGHT) * 0.5f }, { 800.0f, 800.0f }, 0.0f, { { bottomLeft, 0.0f, 0.0f }, { topLeft, 0.0f, 1.0f }, { bottomRight, 1.0f, 0.0f }, { topRight, 1.0f, 1.0f} }, { 0, 1, 2, 1, 2, 3 });
+	Quad2D quad = Quad2D::Create({ static_cast<float>(config.VIEWPORT_WIDTH) * 0.5f, static_cast<float>(config.VIEWPORT_HEIGHT) * 0.5f }, { 800.0f, 800.0f }, 45.0f, { { bottomLeft, 0.0f, 0.0f }, { topLeft, 0.0f, 1.0f }, { bottomRight, 1.0f, 0.0f }, { topRight, 1.0f, 1.0f} }, { 0, 1, 2, 1, 2, 3 });
 	//Quad2D quad = Quad2D::Create({910, 540}, { 400.0f, 400.0f }, 0.0f, { bottomLeft, topLeft, bottomRight, topRight }, { 0, 1, 2, 1, 2, 3 });
 
 	Triangle2D triangle = Triangle2D::Create({ bottomLeft, 0.0f, 0.0f }, { bottomRight, 1.0f, 0.0f }, { topLeft, 0.0f, 1.0f }, {config.WIDTH * 0.5f, config.HEIGHT * 0.5f}, {500.0f, 500.0f}, 10.0f);
