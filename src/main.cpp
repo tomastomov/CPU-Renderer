@@ -145,6 +145,45 @@ static bool IsPointInsideTriangle(TriangleAngleData& triangleAngleData, Vector2 
 	return true;
 }
 
+static bool SameSignOrZero(float a, float b)
+{
+	return a == 0.0f || b == 0.0f ||
+		(a > 0.0f && b > 0.0f) ||
+		(a < 0.0f && b < 0.0f);
+}
+
+static bool IsPointInsideTriangleFast(
+	Vector2 a,
+	Vector2 b,
+	Vector2 c,
+	Vector2 h)
+{
+	Vector2 AB = b - a;
+	Vector2 AH = h - a;
+
+	Vector2 BC = c - b;
+	Vector2 BH = h - b;
+
+	Vector2 CA = a - c;
+	Vector2 CH = h - c;
+
+	float cross1 = AB.Cross(AH);
+	float cross2 = BC.Cross(BH);
+	float cross3 = CA.Cross(CH);
+
+	bool hasNegative =
+		cross1 < 0.0f ||
+		cross2 < 0.0f ||
+		cross3 < 0.0f;
+
+	bool hasPositive =
+		cross1 > 0.0f ||
+		cross2 > 0.0f ||
+		cross3 > 0.0f;
+
+	return !(hasNegative && hasPositive);
+}
+
 static std::pair<float, float> GetUVWeightsFast(
 	const Vertex2& a,
 	const Vertex2& b,
@@ -203,6 +242,7 @@ static std::pair<float, float> GetUVWeights(Vertex2& a, Vertex2& b, Vertex2& c, 
 	double distB = GetDistanceToOppositeSide(ah, ch, (a.vector - c.vector).GetLength());
 	double distC = GetDistanceToOppositeSide(ah, bh, (a.vector - b.vector).GetLength());
 	double distA = GetDistanceToOppositeSide(ch, bh, (b.vector - c.vector).GetLength());
+
 	double heightA = GetDistanceToOppositeSide(ab, ac, bc);
 	double heightB = GetDistanceToOppositeSide(ab, bc, ac);
 	double heightC = GetDistanceToOppositeSide(bc, ac, ab);
@@ -230,9 +270,13 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 
 	Vector2 p = { static_cast<float>(x), static_cast<float>(y) };
 
-	if (!IsPointInsideTriangle(triangleAngleData, p)) {
+	if (!IsPointInsideTriangleFast(triangleAngleData.a.vector, triangleAngleData.b.vector, triangleAngleData.c.vector, p)) {
 		return;
 	}
+
+	/*if (!IsPointInsideTriangle(triangleAngleData, p)) {
+		return;
+	}*/
 
 	Vertex2 testA = { {5.0f, 5.0f}, 0.0f, 0.0f };
 	Vertex2 testB = { {5.0f, 10.0f}, 0.0f, 1.0f};
