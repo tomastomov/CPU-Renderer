@@ -186,8 +186,9 @@ static std::pair<float, float> GetUVWeightsFast(
 
 static double GetDistanceToOppositeSide(double ad1, double ad2, double opposite) {
 	double ad1Sq = ad1 * ad1;
-	double p = ((opposite * opposite) + (ad1Sq)-(ad2 * ad2)) / (2.0 * opposite);
-	return std::sqrt(ad1Sq - (p * p));
+	double p = ((opposite * opposite) + (ad1Sq) - (ad2 * ad2)) / (2.0 * opposite);
+	double len = std::sqrt(ad1Sq - (p * p));
+	return len;
 }
 
 static std::pair<float, float> GetUVWeights(Vertex2& a, Vertex2& b, Vertex2& c, Vector2 h) {
@@ -195,19 +196,20 @@ static std::pair<float, float> GetUVWeights(Vertex2& a, Vertex2& b, Vertex2& c, 
 	double bh = h.GetDistance(b.vector);
 	double ch = h.GetDistance(c.vector);
 
+	double ab = (a.vector - b.vector).GetLength();
+	double ac = (a.vector - c.vector).GetLength();
+	double bc = (b.vector - c.vector).GetLength();
+
 	double distB = GetDistanceToOppositeSide(ah, ch, (a.vector - c.vector).GetLength());
 	double distC = GetDistanceToOppositeSide(ah, bh, (a.vector - b.vector).GetLength());
 	double distA = GetDistanceToOppositeSide(ch, bh, (b.vector - c.vector).GetLength());
+	double heightA = GetDistanceToOppositeSide(ab, ac, bc);
+	double heightB = GetDistanceToOppositeSide(ab, bc, ac);
+	double heightC = GetDistanceToOppositeSide(bc, ac, ab);
 
-	double total = distA + distB + distC;
-
-	double a1 = distA / total;
-	double b1 = distB / total;
-	double c1 = distC / total;
-
-	if (a1 > 1.0 || b1 > 1.0 || c1 > 1.0 || a1 < 0.0 || b1 < 0.0 || c1 < 0.0) {
-		CPURenderer::Log("a: {}, b: {},  c1: {}", a1, b1, c1);
-	}
+	double a1 = distA / heightA;
+	double b1 = distB / heightB;
+	double c1 = distC / heightC;
 
 	float u = a1 * a.u + b1 * b.u + c1 * c.u;
 	float v = a1 * a.v + b1 * b.v + c1 * c.v;
@@ -234,11 +236,7 @@ static void DrawPixel(int x, int y, uint32_t* frameBuffer, const GameConfig& con
 
 	Vertex2 testA = { {5.0f, 5.0f}, 0.0f, 0.0f };
 	Vertex2 testB = { {5.0f, 10.0f}, 0.0f, 1.0f};
-	Vertex2 testC = { {10.0f, 5.0f}, 1.0f, 0.0f};
-
-	GetUVWeights(testA, testB, testC, { 5.0f, 7.5f });
-	//GetUVWeights(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, { 560.0f, 540.0f});
-	GetUVWeightsFast(triangleAngleData.a, triangleAngleData.b, triangleAngleData.c, { 560.0f, 540.0f });
+	Vertex2 testC = { {100.0f, 5.0f}, 1.0f, 0.0f};
 
 	bool isInsideWorld = x < config.WIDTH && y < config.HEIGHT && x >= 0 && y >= 0 && isOnLine;
 	bool isInsideViewPort = x < config.VIEWPORT_WIDTH && y < config.VIEWPORT_HEIGHT && x >= 0 && y >= 0;
