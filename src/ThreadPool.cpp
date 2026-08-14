@@ -28,6 +28,7 @@ namespace CPURenderer {
 	{
 		_threadCount = threadCount;
 		_workers.reserve(threadCount);
+		_stopping = false;
 
 		for (int i = 0; i < threadCount; i++) {
 			_workers.push_back(std::thread([this] { WorkerLoop(); }));
