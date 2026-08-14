@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <Texture.h>
 #include <Vertex2.h>
+#include <ThreadPool.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
@@ -17,6 +18,7 @@ using CPURenderer::Texture;
 using CPURenderer::Vertex2;
 using CPURenderer::Triangle2D;
 using CPURenderer::Quad2D;
+using CPURenderer::ThreadPool;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
@@ -387,16 +389,28 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 	return;
 }
 
-static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
+static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config, Texture& texture, ThreadPool& threadPool) {
 	auto& indeces = quad.indeces;
 	if (indeces.size() == 0 || indeces.size() % 3 != 0) {
 		CPURenderer::Log("Not enough indeces provided");
 		return;
 	}
 
+	std::vector<std::future<void>> jobs;
+	jobs.reserve(2);
+
 	for (int i = 0; i < indeces.size(); i += 3) {
 		Triangle2D triangle = Triangle2D::Create(quad.points[indeces[i]], quad.points[indeces[i + 1]], quad.points[indeces[i + 2]], quad.pos, quad.size, quad.rotate);
-		DrawTriangle(triangle, frameBuffer, config, texture);
+
+		jobs.push_back(threadPool.SubmitJob(
+			[triangle, &frameBuffer, &config, &texture]() mutable {
+				DrawTriangle(triangle, frameBuffer, config, texture);
+			}
+		));
+	}
+
+	for (const auto& job : jobs) {
+		job.wait();
 	}
 }
 
@@ -447,6 +461,8 @@ int main() {
 		return -1;
 	}
 
+	ThreadPool threadPool(8);
+
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, config.WIDTH, config.HEIGHT);
 
 	uint32_t* frameBuffer = new uint32_t[config.WIDTH * config.HEIGHT]{};
@@ -492,14 +508,7 @@ int main() {
 			}
 		}
 
-		DrawQuad(quad, frameBuffer, config, gorillaTexture);
-
-		for (int i = 0; i < gorillaTexture.GetWidth(); i++) {
-			for (int j = 0; j < gorillaTexture.GetHeight(); j++) {
-				Pixel p = gorillaTexture.GetPixel(i, j);
-				frameBuffer[j * config.WIDTH + i] = GetColorFromARGB(p.a, p.r, p.g, p.b);
-			}
-		}
+		DrawQuad(quad, frameBuffer, config, gorillaTexture, threadPool);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
