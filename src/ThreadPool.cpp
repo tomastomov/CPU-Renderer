@@ -7,8 +7,12 @@ namespace CPURenderer {
 			std::unique_lock lock(_mutex);
 
 			_cv.wait(lock, [this] {
-				return !_tasks.empty();
+				return !_tasks.empty() || !_stopping;
 			});
+
+			if (_stopping && _tasks.empty()) {
+				return;
+			}
 
 			auto task = std::move(_tasks.back());
 			_tasks.pop_back();
@@ -31,7 +35,16 @@ namespace CPURenderer {
 	}
 
 	ThreadPool::~ThreadPool() {
+		{
+			std::lock_guard lock(_mutex);
+			_stopping = true;
+		}
 
+		_cv.notify_all();
+
+		for (auto& worker : _workers) {
+			worker.join();
+		}
 	}
 	std::future<void> ThreadPool::SubmitJob(std::move_only_function<void()> fn)
 	{

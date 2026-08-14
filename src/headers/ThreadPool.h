@@ -15,6 +15,7 @@ namespace CPURenderer {
 		std::vector<ThreadPoolJob> _tasks;
 		std::mutex _mutex;
 		std::condition_variable _cv;
+		bool _stopping;
 
 		void WorkerLoop();
 	public:
