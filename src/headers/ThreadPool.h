@@ -21,6 +21,7 @@ namespace CPURenderer {
 	public:
 		ThreadPool(uint8_t threadCount);
 		~ThreadPool();
+		static ThreadPool& GetInstance();
 
 		std::future<void> SubmitJob(std::move_only_function<void()> fn);
 	};

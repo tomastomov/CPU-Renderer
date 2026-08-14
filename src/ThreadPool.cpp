@@ -7,7 +7,7 @@ namespace CPURenderer {
 			std::unique_lock lock(_mutex);
 
 			_cv.wait(lock, [this] {
-				return !_tasks.empty() || !_stopping;
+				return !_tasks.empty() || _stopping;
 			});
 
 			if (_stopping && _tasks.empty()) {
@@ -46,6 +46,12 @@ namespace CPURenderer {
 		for (auto& worker : _workers) {
 			worker.join();
 		}
+	}
+	ThreadPool& ThreadPool::GetInstance()
+	{
+		static ThreadPool instance(std::thread::hardware_concurrency());
+
+		return instance;
 	}
 	std::future<void> ThreadPool::SubmitJob(std::move_only_function<void()> fn)
 	{

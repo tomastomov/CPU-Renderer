@@ -374,6 +374,9 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 	Vector2 tempB = b;
 	Vector2 tempC = c;
 
+	std::vector<std::future<void>> jobs;
+	jobs.reserve(10000);
+
 	while (keepDrawing) {
 		tempA.x += caLine.x;
 		tempA.y += caLine.y;
@@ -381,15 +384,30 @@ static void DrawTriangle(Triangle2D& triangle, uint32_t* frameBuffer, const Game
 		tempB.x += cbLine.x;
 		tempB.y += cbLine.y;
 
-		DrawLine(tempA, tempB, frameBuffer, config, triangleAngleData, texture);
+		jobs.push_back(ThreadPool::GetInstance().SubmitJob(
+			[tempA, tempB, &frameBuffer, &config, &triangleAngleData, &texture] {
+				DrawLine(
+					tempA,
+					tempB,
+					frameBuffer,
+					config,
+					triangleAngleData,
+					texture
+				);
+			}
+		));
 
 		keepDrawing = hasNotReachedLineEnd(caLine, tempA, c) && hasNotReachedLineEnd(cbLine, tempB, c);
+	}
+
+	for (auto& job : jobs) {
+		job.wait();
 	}
 
 	return;
 }
 
-static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config, Texture& texture, ThreadPool& threadPool) {
+static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& config, Texture& texture) {
 	auto& indeces = quad.indeces;
 	if (indeces.size() == 0 || indeces.size() % 3 != 0) {
 		CPURenderer::Log("Not enough indeces provided");
@@ -402,7 +420,7 @@ static void DrawQuad(Quad2D& quad, uint32_t* frameBuffer, const GameConfig& conf
 	for (int i = 0; i < indeces.size(); i += 3) {
 		Triangle2D triangle = Triangle2D::Create(quad.points[indeces[i]], quad.points[indeces[i + 1]], quad.points[indeces[i + 2]], quad.pos, quad.size, quad.rotate);
 
-		jobs.push_back(threadPool.SubmitJob(
+		jobs.push_back(ThreadPool::GetInstance().SubmitJob(
 			[triangle, &frameBuffer, &config, &texture]() mutable {
 				DrawTriangle(triangle, frameBuffer, config, texture);
 			}
@@ -508,7 +526,7 @@ int main() {
 			}
 		}
 
-		DrawQuad(quad, frameBuffer, config, gorillaTexture, threadPool);
+		DrawQuad(quad, frameBuffer, config, gorillaTexture);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
