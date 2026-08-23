@@ -11,6 +11,7 @@
 #include <ThreadPool.h>
 #include <Utils.h>
 #include <Renderer2D.h>
+#include <Renderer3D.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
@@ -22,6 +23,7 @@ using CPURenderer::Quad2D;
 using CPURenderer::ThreadPool;
 using CPURenderer::Utils;
 using CPURenderer::Renderer2D;
+using CPURenderer::Renderer3D;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
@@ -103,7 +105,9 @@ int main() {
 			}
 		}
 
-		Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
+		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
+
+		Renderer3D::DrawTethradon({ -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, {}, frameBuffer, config);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
