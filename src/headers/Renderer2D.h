@@ -11,14 +11,14 @@ namespace CPURenderer {
 	class Renderer2D {
 	public:
 		static inline void DrawTriangle(Triangle2D& triangle, const GameConfig& config, uint32_t* frameBuffer, Texture& texture) {
-			double abLen = (triangle.b.vector - triangle.a.vector).GetLength();
-			double bcLen = (triangle.c.vector - triangle.b.vector).GetLength();
-			double caLen = (triangle.a.vector - triangle.c.vector).GetLength();
+			Vector2 ab = triangle.b.vector - triangle.a.vector;
+			Vector2 ac = triangle.c.vector - triangle.a.vector;
 
-			if (abLen + bcLen <= caLen ||
-				abLen + caLen <= bcLen ||
-				bcLen + caLen <= abLen)
-			{
+			float twiceArea = ab.Cross(ac);
+			float area = twiceArea * 0.5f;
+			float eps = 1e-4;
+
+			if (std::abs(area) < eps) {
 				CPURenderer::Log("Invalid triangle");
 				return;
 			}
