@@ -57,6 +57,7 @@ int main() {
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, config.WIDTH, config.HEIGHT);
 
 	uint32_t* frameBuffer = new uint32_t[config.WIDTH * config.HEIGHT]{};
+	float* depthBuffer = new float[config.WIDTH * config.HEIGHT]{};
 
 	Vector2 bottomLeft = { -0.5f, -0.5f };
 	Vector2 topLeft = { -0.5f, 0.5f };
@@ -77,6 +78,7 @@ int main() {
 
 	while (running) {
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
+		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, -1e5);
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -107,7 +109,7 @@ int main() {
 
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
 
-		Renderer3D::DrawTethradon({ -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, {}, frameBuffer, config);
+		Renderer3D::DrawTethradon({ -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, {}, frameBuffer, depthBuffer, config);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 

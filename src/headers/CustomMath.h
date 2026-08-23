@@ -1,8 +1,32 @@
 #pragma once
 #include "Vertex2.h"
+#include "Vector3.h"
 
 namespace CPURenderer {
 	struct CustomMath {
+		static inline Vector3 GetBarycentric(
+			const Vector2& a,
+			const Vector2& b,
+			const Vector2& c,
+			const Vector2& p)
+		{
+			float denom =
+				(b.y - c.y) * (a.x - c.x) +
+				(c.x - b.x) * (a.y - c.y);
+
+			float w0 =
+				((b.y - c.y) * (p.x - c.x) +
+					(c.x - b.x) * (p.y - c.y)) / denom;
+
+			float w1 =
+				((c.y - a.y) * (p.x - c.x) +
+					(a.x - c.x) * (p.y - c.y)) / denom;
+
+			float w2 = 1.0f - w0 - w1;
+
+			return { w0, w1, w2 };
+		};
+
 		static inline std::pair<float, float> GetUVWeightsFast(
 			const Vertex2& a,
 			const Vertex2& b,
