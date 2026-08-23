@@ -6,7 +6,6 @@
 #include <Quad2D.h>
 #include <Triangle2D.h>
 #include <GameConfig.h>
-#include <assert.h>
 #include <Texture.h>
 #include <Vertex2.h>
 #include <ThreadPool.h>

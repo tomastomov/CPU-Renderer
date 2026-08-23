@@ -30,3 +30,10 @@ add_custom_command(TARGET CPU-Renderer POST_BUILD
     "${CMAKE_SOURCE_DIR}/src/resources"
     "$<TARGET_FILE_DIR:CPU-Renderer>/resources"
 )
+
+if(MSVC)
+    target_compile_options(CPU-Renderer PRIVATE
+        $<$<CONFIG:Debug>:/FAs>
+        $<$<CONFIG:Release>:/FAs>
+    )
+endif()

@@ -160,14 +160,6 @@ namespace CPURenderer {
 				return;
 			}
 
-			/*if (!IsPointInsideTriangle(triangleAngleData, p)) {
-				return;
-			}*/
-
-			Vertex2 testA = { {5.0f, 5.0f}, 0.0f, 0.0f };
-			Vertex2 testB = { {5.0f, 10.0f}, 0.0f, 1.0f };
-			Vertex2 testC = { {100.0f, 5.0f}, 1.0f, 0.0f };
-
 			bool isInsideWorld = x < config.WIDTH && y < config.HEIGHT && x >= 0 && y >= 0 && isOnLine;
 			bool isInsideViewPort = x < config.VIEWPORT_WIDTH && y < config.VIEWPORT_HEIGHT && x >= 0 && y >= 0;
 
