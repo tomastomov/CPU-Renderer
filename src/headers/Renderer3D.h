@@ -28,6 +28,16 @@ namespace CPURenderer {
 			int maxY = std::min(config.HEIGHT - 1,
 				static_cast<int>(std::ceil(std::max({ a.y, b.y, c.y }))));
 
+			float denom =
+				(b.y - c.y) * (a.x - c.x) +
+				(c.x - b.x) * (a.y - c.y);
+
+			if (std::abs(denom) < 0.000001f)
+			{
+				CPURenderer::Log("Degen triangle");
+				return;
+			}
+
 			for (int x = minX; x <= maxX; x++)
 			{
 				for (int y = minY; y <= maxY; y++)
@@ -55,8 +65,11 @@ namespace CPURenderer {
 		}
 	public:
 		static void DrawTethradon(Vector3 a, Vector3 b, Vector3 c, Vector3 d, uint32_t* frameBuffer, float* depthBuffer, const GameConfig& config) {
-			DrawTriangle(a, b, c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), {550.0f, 500.0f, 500.0f});
-			DrawTriangle({ a.x, a.y, a.z + 2.0f }, { b.x, b.y, b.z + 2.0f }, { c.x, c.y, c.z + 2.0f }, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 255, 0), { 500.0f, 500.0f, 500.0f });
+			Vector3 pos = { 550.0f, 500.0f, 20.0f };
+			DrawTriangle(a, b, c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), pos);
+			DrawTriangle(a, c, d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 255, 0), pos);
+			DrawTriangle(b, c, d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 0, 255), pos);
+			DrawTriangle(a, b, d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 120, 120), pos);
 		};
 		static void DrawCube() {
 

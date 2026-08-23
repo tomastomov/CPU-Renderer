@@ -109,7 +109,7 @@ int main() {
 
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
 
-		Renderer3D::DrawTethradon({ -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, {}, frameBuffer, depthBuffer, config);
+		Renderer3D::DrawTethradon({ -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, { -0.1667f, -0.1667f, 0.0f }, frameBuffer, depthBuffer, config);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
