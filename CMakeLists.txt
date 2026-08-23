@@ -9,7 +9,7 @@ if(DEFINED ENV{VCPKG_ROOT})
 endif()
 
 project(CPU-Renderer LANGUAGES CXX)
-add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h" "src/headers/Vector2.h" "src/Vector2.cpp"   "src/headers/Matrix3x3.h" "src/Matrix3x3.cpp" "src/headers/Quad2D.h" "src/headers/Triangle2D.h" "src/headers/GameConfig.h" "src/headers/external/stb_image.h" "src/headers/Texture.h" "src/Texture.cpp" "src/headers/Pixel.h" "src/headers/Vertex2.h" "src/headers/ThreadPool.h" "src/ThreadPool.cpp" "src/headers/Renderer2D.h"   "src/headers/Utils.h" "src/headers/CustomMath.h" "src/headers/Circle2D.h" "src/headers/Renderer3D.h"  "src/headers/Vector3.h")
+add_executable(CPU-Renderer src/main.cpp "src/headers/pch.h" "src/headers/Log.h" "src/headers/Vector2.h" "src/Vector2.cpp"   "src/headers/Matrix3x3.h" "src/Matrix3x3.cpp" "src/headers/Quad2D.h" "src/headers/Triangle2D.h" "src/headers/GameConfig.h" "src/headers/external/stb_image.h" "src/headers/Texture.h" "src/Texture.cpp" "src/headers/Pixel.h" "src/headers/Vertex2.h" "src/headers/ThreadPool.h" "src/ThreadPool.cpp" "src/headers/Renderer2D.h"   "src/headers/Utils.h" "src/headers/CustomMath.h" "src/headers/Circle2D.h" "src/headers/Renderer3D.h"  "src/headers/Vector3.h" "src/headers/Matrix4x4.h" "src/Matrix4x4.cpp")
 
 target_compile_features(CPU-Renderer PRIVATE cxx_std_23)
 
