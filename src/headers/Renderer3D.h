@@ -4,16 +4,16 @@
 #include <GameConfig.h>
 #include <Matrix4x4.h>
 #include "CustomMath.h"
+#include "Tethradon.h"
 
 namespace CPURenderer {
 	class Renderer3D {
 	private:
-		static void DrawTriangle(Vector3 a, Vector3 b, Vector3 c, uint32_t* frameBuffer, float* depthBuffer, const GameConfig& config, uint32_t color, Vector3 pos) {
-			Vector3 size = { 500.0f, 500.0f, 50.0f };
-
+		static void DrawTriangle(Vector3 a, Vector3 b, Vector3 c, uint32_t* frameBuffer, float* depthBuffer, const GameConfig& config, uint32_t color, Vector3 pos, Vector3 size, Vector3 rotate) {
+			Matrix4x4 rotation = Matrix4x4::GetRotatedAroundZ(rotate.z);
 			Matrix4x4 viewportProjectionMatrix = Matrix4x4::GetScaled({ config.VIEWPORT_WIDTH * 0.5f , config.VIEWPORT_HEIGHT * 0.5f, 1.0f}) * Matrix4x4::GetTranslated({ 1.0f, 1.0f, 0.0f });
 			Matrix4x4 ndsProjectionMatrix = Matrix4x4::GetTranslated({ -1.0f, -1.0f, 0.0f }) * Matrix4x4::GetScaled({ 2.0f / config.WIDTH, 2.0f / config.HEIGHT, 1.0f });
-			Matrix4x4 transform = Matrix4x4::GetTranslated(pos) * Matrix4x4::GetScaled(size);
+			Matrix4x4 transform = Matrix4x4::GetTranslated(pos) * rotation * Matrix4x4::GetScaled(size);
 			Matrix4x4 projection = viewportProjectionMatrix * ndsProjectionMatrix * transform;
 
 			a = projection * a;
@@ -64,12 +64,11 @@ namespace CPURenderer {
 			}
 		}
 	public:
-		static void DrawTethradon(Vector3 a, Vector3 b, Vector3 c, Vector3 d, uint32_t* frameBuffer, float* depthBuffer, const GameConfig& config) {
-			Vector3 pos = { 550.0f, 500.0f, 20.0f };
-			DrawTriangle(a, b, c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), pos);
-			DrawTriangle(a, c, d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 255, 0), pos);
-			DrawTriangle(b, c, d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 0, 255), pos);
-			DrawTriangle(a, b, d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 120, 120), pos);
+		static void DrawTethradon(Tethradon& tethradon, uint32_t* frameBuffer, float* depthBuffer, const GameConfig& config) {
+			DrawTriangle(tethradon.a, tethradon.b, tethradon.c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), tethradon.pos, tethradon.size, tethradon.rotate);
+			DrawTriangle(tethradon.a, tethradon.c, tethradon.d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 255, 0), tethradon.pos, tethradon.size, tethradon.rotate);
+			DrawTriangle(tethradon.b, tethradon.c, tethradon.d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 0, 255), tethradon.pos, tethradon.size, tethradon.rotate);
+			DrawTriangle(tethradon.a, tethradon.b, tethradon.d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 120, 120), tethradon.pos, tethradon.size, tethradon.rotate);
 		};
 		static void DrawCube() {
 

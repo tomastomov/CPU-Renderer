@@ -9,7 +9,9 @@ namespace CPURenderer {
 
 		void Scale(const Vector3 v);
 
-		void Rotate(const float angle);
+		void RotateAroundY(const float angle);
+		void RotateAroundZ(const float angle);
+		void RotateAroundX(const float angle);
 
 		void Translate(const Vector3 v);
 
@@ -19,7 +21,7 @@ namespace CPURenderer {
 
 		static Matrix4x4 GetScaled(const Vector3 v);
 
-		static Matrix4x4 GetRotated(float angle);
+		static Matrix4x4 GetRotatedAroundZ(float angle);
 
 		void Print();
 

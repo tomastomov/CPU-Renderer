@@ -18,8 +18,12 @@ namespace CPURenderer {
 		arr[2][2] *= v.z;
 	}
 
-	//TODO
-	void Matrix4x4::Rotate(const float angle)
+	void Matrix4x4::RotateAroundY(const float angle)
+	{
+
+	}
+
+	void Matrix4x4::RotateAroundZ(const float angle)
 	{
 		static constexpr float epsilon = 1e-6f;
 		float radians = angle * std::numbers::pi_v<float> / 180.0f;
@@ -40,6 +44,11 @@ namespace CPURenderer {
 		arr[1][1] = c;
 	}
 
+	void Matrix4x4::RotateAroundX(const float angle)
+	{
+
+	}
+
 	void Matrix4x4::Translate(const Vector3 v)
 	{
 		arr[0][3] = v.x;
@@ -50,7 +59,7 @@ namespace CPURenderer {
 	Matrix4x4 Matrix4x4::GetIdentity()
 	{
 		static constexpr float identity[4][4] = {
-				{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}
+			{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}
 		};
 
 		return Matrix4x4(identity);
@@ -72,10 +81,10 @@ namespace CPURenderer {
 		return identity;
 	}
 
-	Matrix4x4 Matrix4x4::GetRotated(float angle)
+	Matrix4x4 Matrix4x4::GetRotatedAroundZ(float angle)
 	{
 		Matrix4x4 identity = GetIdentity();
-		identity.Rotate(angle);
+		identity.RotateAroundZ(angle);
 
 		return identity;
 	}
