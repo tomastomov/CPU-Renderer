@@ -113,6 +113,9 @@ int main() {
 				if (event.key.scancode == SDL_SCANCODE_E) {
 					tethradon.rotate.y += 45.0f;
 				}
+				if (event.key.scancode == SDL_SCANCODE_R) {
+					tethradon.rotate.x += 45.0f;
+				}
 			}
 			else if (event.type == SDL_EVENT_QUIT) {
 				running = false;
