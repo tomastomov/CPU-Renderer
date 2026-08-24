@@ -76,7 +76,7 @@ int main() {
 
 	CPURenderer::Texture gorillaTexture("resources/gorilla.png");
 
-	Tethradon tethradon = { { -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, { -0.1667f, -0.1667f, 0.0f }, { 500.0f, 500.0f}, {500.0f, 500.0f}, { 0.0f, 0.0f, 0.0f} };
+	Tethradon tethradon = { { -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, { -0.1667f, -0.1667f, 0.0f }, { 500.0f, 500.0f, 20.0f}, {500.0f, 500.0f, 500.0f}, { 0.0f, 0.0f, 0.0f} };
 
 	bool running = true;
 
@@ -110,6 +110,9 @@ int main() {
 				if (event.key.scancode == SDL_SCANCODE_Q) {
 					tethradon.rotate.z += 45.0f;
 				}
+				if (event.key.scancode == SDL_SCANCODE_E) {
+					tethradon.rotate.y += 45.0f;
+				}
 			}
 			else if (event.type == SDL_EVENT_QUIT) {
 				running = false;
@@ -133,6 +136,8 @@ int main() {
 
 	delete[] frameBuffer;
 	frameBuffer = nullptr;
+	delete depthBuffer;
+	depthBuffer = nullptr;
 
 	return 0;
 }

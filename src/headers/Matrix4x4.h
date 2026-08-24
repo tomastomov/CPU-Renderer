@@ -23,6 +23,10 @@ namespace CPURenderer {
 
 		static Matrix4x4 GetRotatedAroundZ(float angle);
 
+		static Matrix4x4 GetRotatedAroundY(float angle);
+
+		static Matrix4x4 GetRotatedAroundX(float angle);
+
 		void Print();
 
 		Matrix4x4 operator *(const Matrix4x4& other);
