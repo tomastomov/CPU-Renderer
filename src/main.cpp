@@ -13,6 +13,7 @@
 #include <Renderer2D.h>
 #include <Renderer3D.h>
 #include <Tethradon.h>
+#include "Cube.h"
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
@@ -26,6 +27,7 @@ using CPURenderer::Utils;
 using CPURenderer::Renderer2D;
 using CPURenderer::Renderer3D;
 using CPURenderer::Tethradon;
+using CPURenderer::Cube;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
@@ -78,6 +80,25 @@ int main() {
 
 	Tethradon tethradon = { { -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, { -0.1667f, -0.1667f, 0.0f }, { 500.0f, 500.0f, 20.0f}, {500.0f, 500.0f, 500.0f}, { 0.0f, 0.0f, 0.0f} };
 
+	Cube cube{
+		// Front face
+		{-1.0f, -1.0f, -1.0f}, // a
+		{ 1.0f, -1.0f, -1.0f}, // b
+		{ 1.0f,  1.0f, -1.0f}, // c
+		{-1.0f,  1.0f, -1.0f}, // d
+
+		// Back face
+		{-1.0f, -1.0f,  1.0f}, // a1
+		{ 1.0f, -1.0f,  1.0f}, // b1
+		{ 1.0f,  1.0f,  1.0f}, // c1
+		{-1.0f,  1.0f,  1.0f}, // d1
+
+		// Transform
+		{500.0f, 500.0f, 20.0f}, // pos
+		{200.0f, 200.0f, 200.0f}, // size
+		{0.0f, 0.0f, 0.0f}  // rotate
+	};
+
 	bool running = true;
 
 	while (running) {
@@ -95,28 +116,35 @@ int main() {
 					triangle.pos.x += 100.0f;
 					quad.pos.x += 100.0f;
 					tethradon.pos.x += 100.0f;
+					cube.pos.x += 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_A) {
 					triangle.pos.x -= 100.0f;
 					quad.pos.x -= 100.0f;
 					tethradon.pos.x -= 100.0f;
+					cube.pos.x -= 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_W) {
 					quad.pos.y -= 100.0f;
 					tethradon.pos.y -= 100.0f;
+					cube.pos.y -= 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_S) {
 					quad.pos.y += 100.0f;
 					tethradon.pos.y += 100.0f;
+					cube.pos.y += 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_Q) {
 					tethradon.rotate.z += 45.0f;
+					cube.rotate.z += 45.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_E) {
 					tethradon.rotate.y += 45.0f;
+					cube.rotate.y += 45.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_R) {
 					tethradon.rotate.x += 45.0f;
+					cube.rotate.x += 45.0f;
 				}
 			}
 			else if (event.type == SDL_EVENT_QUIT) {
@@ -126,7 +154,9 @@ int main() {
 
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
 
-		Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
+		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
+
+		Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
