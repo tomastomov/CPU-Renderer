@@ -103,9 +103,11 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_W) {
 					quad.pos.y -= 100.0f;
+					tethradon.pos.y -= 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_S) {
 					quad.pos.y += 100.0f;
+					tethradon.pos.y += 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_Q) {
 					tethradon.rotate.z += 45.0f;
