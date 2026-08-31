@@ -47,10 +47,12 @@ namespace CPURenderer {
 				Matrix4x4::GetScaled(size);
 
 			Matrix4x4 modelView =
+				Matrix4x4::GetRotatedAroundX(-camera.rotate.x) *
+				Matrix4x4::GetRotatedAroundY(-camera.rotate.y) * 
 				Matrix4x4::GetTranslated({
-					camera.x,
-					camera.y,
-					camera.z
+					camera.pos.x,
+					camera.pos.y,
+					camera.pos.z
 					}) *
 				transform;
 

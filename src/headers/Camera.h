@@ -2,8 +2,7 @@
 
 namespace CPURenderer {
 	struct Camera {
-		float x;
-		float y;
-		float z;
+		Vector3 pos;
+		Vector3 rotate;
 	};
 }

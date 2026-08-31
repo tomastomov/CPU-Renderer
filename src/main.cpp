@@ -106,12 +106,36 @@ int main() {
 	bool running = true;
 	bool isCameraModeOn = false;
 
+	Vector2 previousMouse;
+
 	while (running) {
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
 		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, 1e5);
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_EVENT_MOUSE_MOTION) {
+				if (previousMouse == Vector2::ZERO_VECTOR) {
+					previousMouse.x = event.motion.x;
+					previousMouse.y = event.motion.y;
+					continue;
+				}
+				else {
+					float mouseX = event.motion.x;
+					float mouseY = event.motion.y;
+
+					float deltaX = mouseX - previousMouse.x;
+					float deltaY = mouseY - previousMouse.y;
+
+					constexpr float sensitivity = 0.1f;
+
+					camera.rotate.x += (deltaY * sensitivity);
+					camera.rotate.y += (deltaX * sensitivity);
+
+					previousMouse.x = event.motion.x;
+					previousMouse.y = event.motion.y;
+				}
+			}
 			if (event.type == SDL_EVENT_KEY_DOWN) {
 				CPURenderer::Log("Received keydown event");
 				if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
@@ -119,7 +143,7 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_D) {
 					if (isCameraModeOn) {
-						camera.x -= 100.0f;
+						camera.pos.x -= 100.0f;
 					}
 					else {
 						triangle.pos.x += 100.0f;
@@ -130,7 +154,7 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_A) {
 					if (isCameraModeOn) {
-						camera.x += 100.0f;
+						camera.pos.x += 100.0f;
 					}
 					else {
 						triangle.pos.x -= 100.0f;
@@ -141,7 +165,7 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_W) {
 					if (isCameraModeOn) {
-						camera.z -= 10.0f;
+						camera.pos.z -= 10.0f;
 					}
 					else {
 						quad.pos.y -= 100.0f;
@@ -151,7 +175,7 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_S) {
 					if (isCameraModeOn) {
-						camera.z += 10.0f;
+						camera.pos.z += 10.0f;
 					}
 					else {
 						quad.pos.y += 100.0f;

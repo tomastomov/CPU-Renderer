@@ -2,7 +2,7 @@
 
 #include <pch.h>
 
-#define ENABLE_LOG
+//#define ENABLE_LOG
 
 namespace CPURenderer {
 	template<typename ...Args>
