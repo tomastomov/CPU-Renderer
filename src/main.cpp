@@ -108,7 +108,7 @@ int main() {
 
 	while (running) {
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
-		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, -1e5);
+		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, 1e5);
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {

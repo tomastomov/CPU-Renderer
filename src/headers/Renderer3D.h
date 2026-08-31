@@ -58,7 +58,7 @@ namespace CPURenderer {
 							bary.y * b.z +
 							bary.z * c.z;
 
-						if (z > depthBuffer[index]) {
+						if (z < depthBuffer[index]) {
 							depthBuffer[index] = z;
 							frameBuffer[index] = color;
 						}
