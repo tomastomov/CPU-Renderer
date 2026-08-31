@@ -101,6 +101,25 @@ int main() {
 		{0.0f, 0.0f, 0.0f}  // rotate
 	};
 
+	Cube cube2{
+		// Front face
+		{-1.0f, -1.0f, -1.0f}, // a
+		{ 1.0f, -1.0f, -1.0f}, // b
+		{ 1.0f,  1.0f, -1.0f}, // c
+		{-1.0f,  1.0f, -1.0f}, // d
+
+		// Back face
+		{-1.0f, -1.0f,  1.0f}, // a1
+		{ 1.0f, -1.0f,  1.0f}, // b1
+		{ 1.0f,  1.0f,  1.0f}, // c1
+		{-1.0f,  1.0f,  1.0f}, // d1
+
+		// Transform
+		{200.0f, 200.0f, 1000.0f}, // pos
+		{400.0f, 400.0f, 100.0f}, // size
+		{0.0f, 0.0f, 0.0f}  // rotate
+	};
+
 	Camera camera{};
 
 	bool running = true;
@@ -142,46 +161,16 @@ int main() {
 					running = false;
 				}
 				if (event.key.scancode == SDL_SCANCODE_D) {
-					if (isCameraModeOn) {
-						camera.pos.x -= 100.0f;
-					}
-					else {
-						triangle.pos.x += 100.0f;
-						quad.pos.x += 100.0f;
-						tethradon.pos.x += 100.0f;
-						cube.pos.x += 100.0f;
-					}
+					camera.pos.x -= 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_A) {
-					if (isCameraModeOn) {
-						camera.pos.x += 100.0f;
-					}
-					else {
-						triangle.pos.x -= 100.0f;
-						quad.pos.x -= 100.0f;
-						tethradon.pos.x -= 100.0f;
-						cube.pos.x -= 100.0f;
-					}
+					camera.pos.x += 100.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_W) {
-					if (isCameraModeOn) {
-						camera.pos.z -= 10.0f;
-					}
-					else {
-						quad.pos.y -= 100.0f;
-						tethradon.pos.y -= 100.0f;
-						cube.pos.y -= 100.0f;
-					}
+					camera.pos.z -= 10.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_S) {
-					if (isCameraModeOn) {
-						camera.pos.z += 10.0f;
-					}
-					else {
-						quad.pos.y += 100.0f;
-						tethradon.pos.y += 100.0f;
-						cube.pos.y += 100.0f;
-					}
+					camera.pos.z += 10.0f;
 				}
 				if (event.key.scancode == SDL_SCANCODE_Q) {
 					tethradon.rotate.z += 45.0f;
@@ -209,6 +198,7 @@ int main() {
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
 
 		Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config, camera);
+		Renderer3D::DrawCube(cube2, frameBuffer, depthBuffer, config, camera);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
