@@ -96,7 +96,7 @@ int main() {
 		{-1.0f,  1.0f,  1.0f}, // d1
 
 		// Transform
-		{500.0f, 500.0f, 20.0f}, // pos
+		{500.0f, 500.0f, 1000.0f}, // pos
 		{200.0f, 200.0f, 200.0f}, // size
 		{0.0f, 0.0f, 0.0f}  // rotate
 	};
@@ -141,6 +141,7 @@ int main() {
 				}
 				if (event.key.scancode == SDL_SCANCODE_W) {
 					if (isCameraModeOn) {
+						camera.z -= 10.0f;
 					}
 					else {
 						quad.pos.y -= 100.0f;
@@ -149,9 +150,14 @@ int main() {
 					}
 				}
 				if (event.key.scancode == SDL_SCANCODE_S) {
-					quad.pos.y += 100.0f;
-					tethradon.pos.y += 100.0f;
-					cube.pos.y += 100.0f;
+					if (isCameraModeOn) {
+						camera.z += 10.0f;
+					}
+					else {
+						quad.pos.y += 100.0f;
+						tethradon.pos.y += 100.0f;
+						cube.pos.y += 100.0f;
+					}
 				}
 				if (event.key.scancode == SDL_SCANCODE_Q) {
 					tethradon.rotate.z += 45.0f;
