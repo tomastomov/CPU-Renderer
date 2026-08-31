@@ -14,6 +14,7 @@
 #include <Renderer3D.h>
 #include <Tethradon.h>
 #include "Cube.h"
+#include <Camera.h>
 
 using CPURenderer::Vector2;
 using CPURenderer::Matrix3x3;
@@ -28,6 +29,7 @@ using CPURenderer::Renderer2D;
 using CPURenderer::Renderer3D;
 using CPURenderer::Tethradon;
 using CPURenderer::Cube;
+using CPURenderer::Camera;
 
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
@@ -99,7 +101,10 @@ int main() {
 		{0.0f, 0.0f, 0.0f}  // rotate
 	};
 
+	Camera camera{};
+
 	bool running = true;
+	bool isCameraModeOn = false;
 
 	while (running) {
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
@@ -113,21 +118,35 @@ int main() {
 					running = false;
 				}
 				if (event.key.scancode == SDL_SCANCODE_D) {
-					triangle.pos.x += 100.0f;
-					quad.pos.x += 100.0f;
-					tethradon.pos.x += 100.0f;
-					cube.pos.x += 100.0f;
+					if (isCameraModeOn) {
+						camera.x -= 100.0f;
+					}
+					else {
+						triangle.pos.x += 100.0f;
+						quad.pos.x += 100.0f;
+						tethradon.pos.x += 100.0f;
+						cube.pos.x += 100.0f;
+					}
 				}
 				if (event.key.scancode == SDL_SCANCODE_A) {
-					triangle.pos.x -= 100.0f;
-					quad.pos.x -= 100.0f;
-					tethradon.pos.x -= 100.0f;
-					cube.pos.x -= 100.0f;
+					if (isCameraModeOn) {
+						camera.x += 100.0f;
+					}
+					else {
+						triangle.pos.x -= 100.0f;
+						quad.pos.x -= 100.0f;
+						tethradon.pos.x -= 100.0f;
+						cube.pos.x -= 100.0f;
+					}
 				}
 				if (event.key.scancode == SDL_SCANCODE_W) {
-					quad.pos.y -= 100.0f;
-					tethradon.pos.y -= 100.0f;
-					cube.pos.y -= 100.0f;
+					if (isCameraModeOn) {
+					}
+					else {
+						quad.pos.y -= 100.0f;
+						tethradon.pos.y -= 100.0f;
+						cube.pos.y -= 100.0f;
+					}
 				}
 				if (event.key.scancode == SDL_SCANCODE_S) {
 					quad.pos.y += 100.0f;
@@ -146,6 +165,9 @@ int main() {
 					tethradon.rotate.x += 45.0f;
 					cube.rotate.x += 45.0f;
 				}
+				if (event.key.scancode == SDL_SCANCODE_LCTRL) {
+					isCameraModeOn = !isCameraModeOn;
+				}
 			}
 			else if (event.type == SDL_EVENT_QUIT) {
 				running = false;
@@ -156,7 +178,7 @@ int main() {
 
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
 
-		Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config);
+		Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config, camera);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
