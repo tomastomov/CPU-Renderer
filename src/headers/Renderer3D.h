@@ -47,8 +47,8 @@ namespace CPURenderer {
 				Matrix4x4::GetScaled(size);
 
 			Matrix4x4 modelView =
+				Matrix4x4::GetRotatedAroundY(camera.rotate.y) *
 				Matrix4x4::GetRotatedAroundX(-camera.rotate.x) *
-				Matrix4x4::GetRotatedAroundY(-camera.rotate.y) * 
 				Matrix4x4::GetTranslated({
 					camera.pos.x,
 					camera.pos.y,
@@ -63,7 +63,6 @@ namespace CPURenderer {
 			a = modelView * a;
 			b = modelView * b;
 			c = modelView * c;
-
 
 			constexpr float nearPlane = 1.0f;
 
@@ -81,15 +80,14 @@ namespace CPURenderer {
 			float halfWidth = config.WIDTH * 0.5f;
 			float halfHeight = config.HEIGHT * 0.5f;
 
-			a.x = halfWidth + (a.x - halfWidth) * focalPoint / a.z;
-			a.y = halfHeight + (a.y - halfHeight) * focalPoint / a.z;
+			a.x = halfWidth + a.x * focalPoint / a.z;
+			a.y = halfHeight + a.y * focalPoint / a.z;
 
-			b.x = halfWidth + (b.x - halfWidth) * focalPoint / b.z;
-			b.y = halfHeight + (b.y - halfHeight) * focalPoint / b.z;
+			b.x = halfWidth + b.x * focalPoint / b.z;
+			b.y = halfHeight + b.y * focalPoint / b.z;
 
-			c.x = halfWidth + (c.x - halfWidth) * focalPoint / c.z;
-			c.y = halfHeight + (c.y - halfHeight) * focalPoint / c.z;
-
+			c.x = halfWidth + c.x * focalPoint / c.z;
+			c.y = halfHeight + c.y * focalPoint / c.z;
 
 			a = projection * a;
 			b = projection * b;

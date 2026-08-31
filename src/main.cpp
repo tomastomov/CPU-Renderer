@@ -127,6 +127,8 @@ int main() {
 
 	Vector2 previousMouse;
 
+	SDL_SetWindowRelativeMouseMode(window, true);
+
 	while (running) {
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
 		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, 1e5);
@@ -140,19 +142,13 @@ int main() {
 					continue;
 				}
 				else {
-					float mouseX = event.motion.x;
-					float mouseY = event.motion.y;
-
-					float deltaX = mouseX - previousMouse.x;
-					float deltaY = mouseY - previousMouse.y;
-
 					constexpr float sensitivity = 0.1f;
 
-					camera.rotate.x += (deltaY * sensitivity);
-					camera.rotate.y += (deltaX * sensitivity);
+					float deltaX = event.motion.xrel;
+					float deltaY = event.motion.yrel;
 
-					previousMouse.x = event.motion.x;
-					previousMouse.y = event.motion.y;
+					camera.rotate.x += deltaY * sensitivity;
+					camera.rotate.y += deltaX * sensitivity;
 				}
 			}
 			if (event.type == SDL_EVENT_KEY_DOWN) {
