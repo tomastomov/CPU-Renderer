@@ -147,8 +147,24 @@ int main() {
 					float deltaX = event.motion.xrel;
 					float deltaY = event.motion.yrel;
 
+					//CPURenderer::Log("mouse x is {}, mouse y is {}", deltaX, deltaY);
+
 					camera.rotate.x += deltaY * sensitivity;
 					camera.rotate.y += deltaX * sensitivity;
+
+					if (camera.rotate.y <= -360.0f || camera.rotate.y >= 360.0f) {
+						camera.rotate.y = 0.0f;
+					}
+
+					if (camera.rotate.x <= -90.0f) {
+						camera.rotate.x = -90.0f;
+					}
+
+					if (camera.rotate.x >= 90.0f) {
+						camera.rotate.x = 90.0f;
+					}
+
+					CPURenderer::Log("camera x is {}, camera y is {}", camera.rotate.x, camera.rotate.y);
 				}
 			}
 			if (event.type == SDL_EVENT_KEY_DOWN) {
