@@ -17,6 +17,7 @@
 #include <Camera.h>
 
 using CPURenderer::Vector2;
+using CPURenderer::Vector3;
 using CPURenderer::Matrix3x3;
 using CPURenderer::GameConfig;
 using CPURenderer::Texture;
@@ -134,75 +135,95 @@ int main() {
 		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, 1e5);
 
 		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_EVENT_MOUSE_MOTION) {
-				if (previousMouse == Vector2::ZERO_VECTOR) {
-					previousMouse.x = event.motion.x;
-					previousMouse.y = event.motion.y;
-					continue;
-				}
-				else {
-					constexpr float sensitivity = 0.1f;
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_EVENT_MOUSE_MOTION)
+			{
+				constexpr float sensitivity = 0.1f;
 
-					float deltaX = event.motion.xrel;
-					float deltaY = event.motion.yrel;
+				camera.rotate.y += event.motion.xrel * sensitivity;
+				camera.rotate.x += event.motion.yrel * sensitivity;
 
-					//CPURenderer::Log("mouse x is {}, mouse y is {}", deltaX, deltaY);
+				if (camera.rotate.x > 89.0f)
+					camera.rotate.x = 89.0f;
 
-					camera.rotate.x += deltaY * sensitivity;
-					camera.rotate.y += deltaX * sensitivity;
-
-					if (camera.rotate.y <= -360.0f || camera.rotate.y >= 360.0f) {
-						camera.rotate.y = 0.0f;
-					}
-
-					if (camera.rotate.x <= -90.0f) {
-						camera.rotate.x = -90.0f;
-					}
-
-					if (camera.rotate.x >= 90.0f) {
-						camera.rotate.x = 90.0f;
-					}
-
-					CPURenderer::Log("camera x is {}, camera y is {}", camera.rotate.x, camera.rotate.y);
-				}
+				if (camera.rotate.x < -89.0f)
+					camera.rotate.x = -89.0f;
 			}
-			if (event.type == SDL_EVENT_KEY_DOWN) {
-				CPURenderer::Log("Received keydown event");
-				if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
+
+			if (event.type == SDL_EVENT_KEY_DOWN)
+			{
+				if (event.key.scancode == SDL_SCANCODE_ESCAPE)
 					running = false;
-				}
-				if (event.key.scancode == SDL_SCANCODE_D) {
-					camera.pos.x -= 100.0f;
-				}
-				if (event.key.scancode == SDL_SCANCODE_A) {
-					camera.pos.x += 100.0f;
-				}
-				if (event.key.scancode == SDL_SCANCODE_W) {
-					camera.pos.z -= 10.0f;
-				}
-				if (event.key.scancode == SDL_SCANCODE_S) {
-					camera.pos.z += 10.0f;
-				}
-				if (event.key.scancode == SDL_SCANCODE_Q) {
+
+				if (event.key.scancode == SDL_SCANCODE_Q)
+				{
 					tethradon.rotate.z += 45.0f;
 					cube.rotate.z += 45.0f;
 				}
-				if (event.key.scancode == SDL_SCANCODE_E) {
+
+				if (event.key.scancode == SDL_SCANCODE_E)
+				{
 					tethradon.rotate.y += 45.0f;
 					cube.rotate.y += 45.0f;
 				}
-				if (event.key.scancode == SDL_SCANCODE_R) {
+
+				if (event.key.scancode == SDL_SCANCODE_R)
+				{
 					tethradon.rotate.x += 45.0f;
 					cube.rotate.x += 45.0f;
 				}
-				if (event.key.scancode == SDL_SCANCODE_LCTRL) {
-					isCameraModeOn = !isCameraModeOn;
-				}
 			}
-			else if (event.type == SDL_EVENT_QUIT) {
+
+			if (event.type == SDL_EVENT_QUIT)
 				running = false;
-			}
+		}
+
+		const bool* keys = SDL_GetKeyboardState(nullptr);
+
+		constexpr float moveSpeed = 5.0f;
+
+		float yaw = camera.rotate.y * std::numbers::pi_v<float> / 180.0f;
+		float pitch = camera.rotate.x * std::numbers::pi_v<float> / 180.0f;
+
+		Vector3 forward = {
+			-std::sin(yaw) * std::cos(pitch),
+			-std::sin(pitch),
+			 std::cos(yaw) * std::cos(pitch)
+		};
+
+		Vector3 right = {
+			std::cos(yaw),
+			0.0f,
+			std::sin(yaw)
+		};
+
+		if (keys[SDL_SCANCODE_W])
+		{
+			camera.pos.x += forward.x * moveSpeed;
+			camera.pos.y += forward.y * moveSpeed;
+			camera.pos.z += forward.z * moveSpeed;
+		}
+
+		if (keys[SDL_SCANCODE_S])
+		{
+			camera.pos.x -= forward.x * moveSpeed;
+			camera.pos.y -= forward.y * moveSpeed;
+			camera.pos.z -= forward.z * moveSpeed;
+		}
+
+		if (keys[SDL_SCANCODE_D])
+		{
+			camera.pos.x += right.x * moveSpeed;
+			camera.pos.y += right.y * moveSpeed;
+			camera.pos.z += right.z * moveSpeed;
+		}
+
+		if (keys[SDL_SCANCODE_A])
+		{
+			camera.pos.x -= right.x * moveSpeed;
+			camera.pos.y -= right.y * moveSpeed;
+			camera.pos.z -= right.z * moveSpeed;
 		}
 
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
@@ -225,7 +246,7 @@ int main() {
 
 	delete[] frameBuffer;
 	frameBuffer = nullptr;
-	delete depthBuffer;
+	delete[] depthBuffer;
 	depthBuffer = nullptr;
 
 	return 0;

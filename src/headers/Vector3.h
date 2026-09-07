@@ -5,5 +5,6 @@ namespace CPURenderer {
 		float x, y, z;
 
 		Vector3 operator-(Vector3& other);
+		Vector3 operator*(float value);
 	};
 }
