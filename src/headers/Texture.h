@@ -18,5 +18,6 @@ namespace CPURenderer {
 		int GetSize();
 
 		Pixel GetPixel(int x, int y);
+		Pixel GetPixelUV(float u, float v);
 	};
 }

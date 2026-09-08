@@ -53,4 +53,15 @@ namespace CPURenderer {
 			_data[offset + 3]
 		};
 	}
+
+	Pixel Texture::GetPixelUV(float u, float v)
+	{
+		u = std::clamp(u, 0.0f, 1.0f);
+		v = std::clamp(v, 0.0f, 1.0f);
+
+		int x = static_cast<int>(u * (_width - 1));
+		int y = static_cast<int>(v * (_height - 1));
+
+		return GetPixel(x, y);
+	}
 }
