@@ -218,7 +218,7 @@ int main() {
 		{0.0f, 90.0f, 0.0f}  // rotate
 	});
 
-	cubes.push_back({
+	Cube door = {
 		// Front face
 		{-1.0f, -1.0f, -1.0f}, // a
 		{ 1.0f, -1.0f, -1.0f}, // b
@@ -234,6 +234,27 @@ int main() {
 		// Transform
 		{-500.0f, 500.0f, 0.0f}, // pos
 		{200.0f, 400.0f, 100.0f}, // size
+		{0.0f, 90.0f, 0.0f}  // rotate
+	};
+
+	cubes.push_back(door);
+
+	cubes.push_back({
+		// Front face
+		{-1.0f, -1.0f, -1.0f}, // a
+		{ 1.0f, -1.0f, -1.0f}, // b
+		{ 1.0f,  1.0f, -1.0f}, // c
+		{-1.0f,  1.0f, -1.0f}, // d
+
+		// Back face
+		{-1.0f, -1.0f,  1.0f}, // a1
+		{ 1.0f, -1.0f,  1.0f}, // b1
+		{ 1.0f,  1.0f,  1.0f}, // c1
+		{-1.0f,  1.0f,  1.0f}, // d1
+
+		// Transform
+		{500.0f * 20, 500.0f, 0.0f}, // pos
+		{1200.0f, 400.0f, 200.0f}, // size
 		{0.0f, 90.0f, 0.0f}  // rotate
 		});
 
