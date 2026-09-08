@@ -294,18 +294,55 @@ namespace CPURenderer {
 			DrawTriangle(tethradon.a, tethradon.b, tethradon.d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 120, 120), tethradon.pos, tethradon.size, tethradon.rotate, camera);
 		};
 		static void DrawCube(Cube& cube, uint32_t* frameBuffer, float* depthBuffer, const GameConfig& config, Camera& camera) {
-			DrawTriangle(cube.a, cube.b, cube.c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.a, cube.c, cube.d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.b, cube.b1, cube.c1, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 255, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.b, cube.c, cube.c1, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 255, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.a1, cube.b1, cube.c1, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 0, 255), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.a1, cube.d1, cube.c1, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 0, 255), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.a, cube.a1, cube.d, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 120, 120), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.d, cube.a1, cube.d1, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 0, 120, 120), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.a, cube.a1, cube.b, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.b, cube.b1, cube.a1, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.d, cube.d1, cube.c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), cube.pos, cube.size, cube.rotate, camera);
-			DrawTriangle(cube.d1, cube.c1, cube.c, frameBuffer, depthBuffer, config, Utils::GetColorFromARGB(255, 255, 0, 0), cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.a, cube.b, cube.c,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 220, 60, 60),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.a, cube.c, cube.d,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 190, 45, 45),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.b, cube.b1, cube.c1,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 70, 200, 90),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.b, cube.c, cube.c1,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 50, 170, 70),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.a1, cube.b1, cube.c1,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 70, 110, 230),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.a1, cube.d1, cube.c1,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 50, 85, 200),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.a, cube.a1, cube.d,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 50, 190, 200),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.d, cube.a1, cube.d1,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 35, 160, 170),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.a, cube.a1, cube.b,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 240, 160, 50),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.b, cube.b1, cube.a1,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 210, 125, 35),
+				cube.pos, cube.size, cube.rotate, camera);
+			DrawTriangle(cube.d, cube.d1, cube.c,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 170, 80, 220),
+				cube.pos, cube.size, cube.rotate, camera);
+
+			DrawTriangle(cube.d1, cube.c1, cube.c,
+				frameBuffer, depthBuffer, config,
+				Utils::GetColorFromARGB(255, 140, 60, 190),
+				cube.pos, cube.size, cube.rotate, camera);
 		};
 
 		static void DrawCube(
