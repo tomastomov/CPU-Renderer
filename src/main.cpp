@@ -267,9 +267,9 @@ int main() {
 		float pitch = camera.rotate.x * std::numbers::pi_v<float> / 180.0f;
 
 		Vector3 forward = {
-			-std::sin(yaw) * std::cos(pitch),
-			-std::sin(pitch),
-			 std::cos(yaw) * std::cos(pitch)
+			-std::sin(yaw),
+			0.0f,
+			 std::cos(yaw)
 		};
 
 		Vector3 right = {
