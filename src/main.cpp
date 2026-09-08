@@ -36,6 +36,13 @@ using CPURenderer::CubeMesh;
 //TODO:: figure out on how to know if a point is inside a triangle or not
 //TODO:: check if it is inside viewport
 
+double GetTime()
+{
+	static const Uint64 frequency = SDL_GetPerformanceFrequency();
+	return static_cast<double>(SDL_GetPerformanceCounter()) /
+		static_cast<double>(frequency);
+}
+
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		CPURenderer::Log("Failed to init sdl video");
@@ -264,10 +271,23 @@ int main() {
 	std::future<void> jobs[jobsSize];
 	int jobIndex = 0;
 
+	double time = GetTime();
+
+	constexpr float renderingFixedDelta = 1.0f / 60.0f;
+
 	while (running) {
 		jobIndex = 0;
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
 		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, 1e5);
+
+		double now = GetTime();
+		double delta = now - time;
+
+		if (delta < renderingFixedDelta) {
+			continue;
+		}
+
+		delta -= renderingFixedDelta;
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
@@ -298,7 +318,7 @@ int main() {
 
 		const bool* keys = SDL_GetKeyboardState(nullptr);
 
-		constexpr float moveSpeed = 5.0f;
+		constexpr float moveSpeed = 2000.0f;
 
 		float yaw = camera.rotate.y * std::numbers::pi_v<float> / 180.0f;
 		float pitch = camera.rotate.x * std::numbers::pi_v<float> / 180.0f;
@@ -317,30 +337,30 @@ int main() {
 
 		if (keys[SDL_SCANCODE_W])
 		{
-			camera.pos.x += forward.x * moveSpeed;
-			camera.pos.y += forward.y * moveSpeed;
-			camera.pos.z += forward.z * moveSpeed;
+			camera.pos.x += forward.x * moveSpeed * renderingFixedDelta;
+			camera.pos.y += forward.y * moveSpeed * renderingFixedDelta;
+			camera.pos.z += forward.z * moveSpeed * renderingFixedDelta;
 		}
 
 		if (keys[SDL_SCANCODE_S])
 		{
-			camera.pos.x -= forward.x * moveSpeed;
-			camera.pos.y -= forward.y * moveSpeed;
-			camera.pos.z -= forward.z * moveSpeed;
+			camera.pos.x -= forward.x * moveSpeed * renderingFixedDelta;
+			camera.pos.y -= forward.y * moveSpeed * renderingFixedDelta;
+			camera.pos.z -= forward.z * moveSpeed * renderingFixedDelta;
 		}
 
 		if (keys[SDL_SCANCODE_D])
 		{
-			camera.pos.x += right.x * moveSpeed;
-			camera.pos.y += right.y * moveSpeed;
-			camera.pos.z += right.z * moveSpeed;
+			camera.pos.x += right.x * moveSpeed * renderingFixedDelta;
+			camera.pos.y += right.y * moveSpeed * renderingFixedDelta;
+			camera.pos.z += right.z * moveSpeed * renderingFixedDelta;
 		}
 
 		if (keys[SDL_SCANCODE_A])
 		{
-			camera.pos.x -= right.x * moveSpeed;
-			camera.pos.y -= right.y * moveSpeed;
-			camera.pos.z -= right.z * moveSpeed;
+			camera.pos.x -= right.x * moveSpeed * renderingFixedDelta;
+			camera.pos.y -= right.y * moveSpeed * renderingFixedDelta;
+			camera.pos.z -= right.z * moveSpeed * renderingFixedDelta;
 		}
 
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
@@ -378,6 +398,8 @@ int main() {
 		SDL_RenderClear(renderer);
 		SDL_RenderTexture(renderer, texture, nullptr, nullptr);
 		SDL_RenderPresent(renderer);
+
+		time = now;
 	}
 
 	SDL_Quit();
