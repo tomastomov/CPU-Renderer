@@ -180,6 +180,63 @@ int main() {
 			});
 	}
 
+	cubes.push_back({
+		// Front face
+		{-1.0f, -1.0f, -1.0f}, // a
+		{ 1.0f, -1.0f, -1.0f}, // b
+		{ 1.0f,  1.0f, -1.0f}, // c
+		{-1.0f,  1.0f, -1.0f}, // d
+
+		// Back face
+		{-1.0f, -1.0f,  1.0f}, // a1
+		{ 1.0f, -1.0f,  1.0f}, // b1
+		{ 1.0f,  1.0f,  1.0f}, // c1
+		{-1.0f,  1.0f,  1.0f}, // d1
+
+		// Transform
+		{-500.0f, 500.0f, 650.0f}, // pos
+		{400.0f, 400.0f, 100.0f}, // size
+		{0.0f, 90.0f, 0.0f}  // rotate
+		});
+
+	cubes.push_back({
+		// Front face
+		{-1.0f, -1.0f, -1.0f}, // a
+		{ 1.0f, -1.0f, -1.0f}, // b
+		{ 1.0f,  1.0f, -1.0f}, // c
+		{-1.0f,  1.0f, -1.0f}, // d
+
+		// Back face
+		{-1.0f, -1.0f,  1.0f}, // a1
+		{ 1.0f, -1.0f,  1.0f}, // b1
+		{ 1.0f,  1.0f,  1.0f}, // c1
+		{-1.0f,  1.0f,  1.0f}, // d1
+
+		// Transform
+		{-500.0f, 500.0f, -650.0f}, // pos
+		{400.0f, 400.0f, 100.0f}, // size
+		{0.0f, 90.0f, 0.0f}  // rotate
+	});
+
+	cubes.push_back({
+		// Front face
+		{-1.0f, -1.0f, -1.0f}, // a
+		{ 1.0f, -1.0f, -1.0f}, // b
+		{ 1.0f,  1.0f, -1.0f}, // c
+		{-1.0f,  1.0f, -1.0f}, // d
+
+		// Back face
+		{-1.0f, -1.0f,  1.0f}, // a1
+		{ 1.0f, -1.0f,  1.0f}, // b1
+		{ 1.0f,  1.0f,  1.0f}, // c1
+		{-1.0f,  1.0f,  1.0f}, // d1
+
+		// Transform
+		{-500.0f, 500.0f, 0.0f}, // pos
+		{200.0f, 400.0f, 100.0f}, // size
+		{0.0f, 90.0f, 0.0f}  // rotate
+		});
+
 	CubeMesh cubeMesh{
 		// ============================================================
 		// FRONT
@@ -259,6 +316,8 @@ int main() {
 	};
 
 	Camera camera{};
+
+	camera.pos.y += 200.0f;
 
 	bool running = true;
 	bool isCameraModeOn = false;
