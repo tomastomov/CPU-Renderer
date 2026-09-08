@@ -85,43 +85,93 @@ int main() {
 
 	Tethradon tethradon = { { -0.5f, -0.5f, 1.0f }, { 0.5f, -0.5f, 1.0f }, { -0.5f, 0.5f, 1.0f }, { -0.1667f, -0.1667f, 0.0f }, { 500.0f, 500.0f, 20.0f}, {500.0f, 500.0f, 500.0f}, { 0.0f, 0.0f, 0.0f} };
 
-	Cube cube{
-		// Front face
-		{-1.0f, -1.0f, -1.0f}, // a
-		{ 1.0f, -1.0f, -1.0f}, // b
-		{ 1.0f,  1.0f, -1.0f}, // c
-		{-1.0f,  1.0f, -1.0f}, // d
+	std::vector<Cube> cubes;
+	cubes.reserve(100);
+	
+	for (int i = 0; i < 20; i++) {
+		cubes.push_back({
+			// Front face
+			{-1.0f, -1.0f, -1.0f}, // a
+			{ 1.0f, -1.0f, -1.0f}, // b
+			{ 1.0f,  1.0f, -1.0f}, // c
+			{-1.0f,  1.0f, -1.0f}, // d
 
-		// Back face
-		{-1.0f, -1.0f,  1.0f}, // a1
-		{ 1.0f, -1.0f,  1.0f}, // b1
-		{ 1.0f,  1.0f,  1.0f}, // c1
-		{-1.0f,  1.0f,  1.0f}, // d1
+			// Back face
+			{-1.0f, -1.0f,  1.0f}, // a1
+			{ 1.0f, -1.0f,  1.0f}, // b1
+			{ 1.0f,  1.0f,  1.0f}, // c1
+			{-1.0f,  1.0f,  1.0f}, // d1
 
-		// Transform
-		{500.0f, 500.0f, 1000.0f}, // pos
-		{200.0f, 200.0f, 200.0f}, // size
-		{0.0f, 0.0f, 0.0f}  // rotate
-	};
+			// Transform
+			{500.0f * i, 500.0f, 1000.0f}, // pos
+			{400.0f, 400.0f, 200.0f}, // size
+			{0.0f, 0.0f, 0.0f}  // rotate
+		});
+	}
 
-	Cube cube2{
-		// Front face
-		{-1.0f, -1.0f, -1.0f}, // a
-		{ 1.0f, -1.0f, -1.0f}, // b
-		{ 1.0f,  1.0f, -1.0f}, // c
-		{-1.0f,  1.0f, -1.0f}, // d
 
-		// Back face
-		{-1.0f, -1.0f,  1.0f}, // a1
-		{ 1.0f, -1.0f,  1.0f}, // b1
-		{ 1.0f,  1.0f,  1.0f}, // c1
-		{-1.0f,  1.0f,  1.0f}, // d1
+	for (int i = 0; i < 20; i++) {
+		cubes.push_back({
+			// Front face
+			{-1.0f, -1.0f, -1.0f}, // a
+			{ 1.0f, -1.0f, -1.0f}, // b
+			{ 1.0f,  1.0f, -1.0f}, // c
+			{-1.0f,  1.0f, -1.0f}, // d
 
-		// Transform
-		{200.0f, 200.0f, 1000.0f}, // pos
-		{400.0f, 400.0f, 100.0f}, // size
-		{0.0f, 0.0f, 0.0f}  // rotate
-	};
+			// Back face
+			{-1.0f, -1.0f,  1.0f}, // a1
+			{ 1.0f, -1.0f,  1.0f}, // b1
+			{ 1.0f,  1.0f,  1.0f}, // c1
+			{-1.0f,  1.0f,  1.0f}, // d1
+
+			// Transform
+			{500.0f * i, 500.0f, -1000.0f}, // pos
+			{400.0f, 400.0f, 200.0f}, // size
+			{0.0f, 0.0f, 0.0f}  // rotate
+			});
+	}
+
+	for (int i = 0; i < 20; i++) {
+		cubes.push_back({
+			// Front face
+			{-1.0f, -1.0f, -1.0f}, // a
+			{ 1.0f, -1.0f, -1.0f}, // b
+			{ 1.0f,  1.0f, -1.0f}, // c
+			{-1.0f,  1.0f, -1.0f}, // d
+
+			// Back face
+			{-1.0f, -1.0f,  1.0f}, // a1
+			{ 1.0f, -1.0f,  1.0f}, // b1
+			{ 1.0f,  1.0f,  1.0f}, // c1
+			{-1.0f,  1.0f,  1.0f}, // d1
+
+			// Transform
+				{500.0f * i, -500.0f, -400.0f}, // pos
+				{400.0f, 800.0f, 100.0f}, // size
+				{-45.0f, 0.0f, 0.0f}  // rotate
+			});
+	}
+
+	for (int i = 0; i < 20; i++) {
+		cubes.push_back({
+			// Front face
+			{-1.0f, -1.0f, -1.0f}, // a
+			{ 1.0f, -1.0f, -1.0f}, // b
+			{ 1.0f,  1.0f, -1.0f}, // c
+			{-1.0f,  1.0f, -1.0f}, // d
+
+			// Back face
+			{-1.0f, -1.0f,  1.0f}, // a1
+			{ 1.0f, -1.0f,  1.0f}, // b1
+			{ 1.0f,  1.0f,  1.0f}, // c1
+			{-1.0f,  1.0f,  1.0f}, // d1
+
+			// Transform
+				{500.0f * i, -500.0f, 400.0f}, // pos
+				{400.0f, 800.0f, 100.0f}, // size
+				{45.0f, 0.0f, 0.0f}  // rotate
+			});
+	}
 
 	CubeMesh cubeMesh{
 		// ============================================================
@@ -235,24 +285,6 @@ int main() {
 			{
 				if (event.key.scancode == SDL_SCANCODE_ESCAPE)
 					running = false;
-
-				if (event.key.scancode == SDL_SCANCODE_Q)
-				{
-					tethradon.rotate.z += 45.0f;
-					cube.rotate.z += 45.0f;
-				}
-
-				if (event.key.scancode == SDL_SCANCODE_E)
-				{
-					tethradon.rotate.y += 45.0f;
-					cube.rotate.y += 45.0f;
-				}
-
-				if (event.key.scancode == SDL_SCANCODE_R)
-				{
-					tethradon.rotate.x += 45.0f;
-					cube.rotate.x += 45.0f;
-				}
 			}
 
 			if (event.type == SDL_EVENT_QUIT)
@@ -310,9 +342,11 @@ int main() {
 
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
 
-		Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config, camera);
-		Renderer3D::DrawCube(cube2, frameBuffer, depthBuffer, config, camera);
-		Renderer3D::DrawCube(cubeMesh, frameBuffer, depthBuffer, config, camera, zombieTexture);
+		for (auto& cube : cubes) {
+			Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config, camera);
+		}
+
+		//Renderer3D::DrawCube(cubeMesh, frameBuffer, depthBuffer, config, camera, zombieTexture);
 
 		//DrawCircle(Circle2D::Create({ config.WIDTH * 0.5f, config.HEIGHT * 0.5f }, { 100.0f, 100.0f }), frameBuffer, config);
 
