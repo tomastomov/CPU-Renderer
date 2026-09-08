@@ -260,6 +260,9 @@ int main() {
 
 	SDL_SetWindowRelativeMouseMode(window, true);
 
+	std::vector<std::future<void>> jobs;
+	jobs.reserve(1000);
+
 	while (running) {
 		std::fill(frameBuffer, frameBuffer + config.WIDTH * config.HEIGHT, 0u);
 		std::fill(depthBuffer, depthBuffer + config.WIDTH * config.HEIGHT, 1e5);
@@ -343,7 +346,21 @@ int main() {
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
 
 		for (auto& cube : cubes) {
-			Renderer3D::DrawCube(cube, frameBuffer, depthBuffer, config, camera);
+			jobs.push_back(ThreadPool::GetInstance().SubmitJob(
+				[&cube, &frameBuffer, &depthBuffer, &config, &camera] {
+					Renderer3D::DrawCube(
+						cube,
+						frameBuffer,
+						depthBuffer,
+						config,
+						camera
+					);
+				}
+			));
+		}
+
+		for (auto& job : jobs) {
+			job.wait();
 		}
 
 		//Renderer3D::DrawCube(cubeMesh, frameBuffer, depthBuffer, config, camera, zombieTexture);
