@@ -221,7 +221,7 @@ int main() {
 			{
 				constexpr float sensitivity = 0.1f;
 
-				camera.rotate.y += event.motion.xrel * sensitivity;
+				camera.rotate.y -= event.motion.xrel * sensitivity;
 				camera.rotate.x += event.motion.yrel * sensitivity;
 
 				if (camera.rotate.x > 89.0f)
