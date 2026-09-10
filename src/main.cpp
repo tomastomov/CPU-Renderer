@@ -256,7 +256,7 @@ int main() {
 		{500.0f * 20, 500.0f, 0.0f}, // pos
 		{1200.0f, 400.0f, 200.0f}, // size
 		{0.0f, 90.0f, 0.0f}  // rotate
-		});
+	});
 
 	CubeMesh cubeMesh{
 		// ============================================================
@@ -343,6 +343,8 @@ int main() {
 	bool running = true;
 	bool isCameraModeOn = false;
 
+	constexpr int doorIndex = 82;
+
 	Vector2 previousMouse;
 
 	SDL_SetWindowRelativeMouseMode(window, true);
@@ -354,6 +356,9 @@ int main() {
 	double time = GetTime();
 
 	constexpr float renderingFixedDelta = 1.0f / 60.0f;
+
+	bool animateDoor = false;
+	int doorAnimationDir = 1;
 
 	while (running) {
 		jobIndex = 0;
@@ -390,6 +395,11 @@ int main() {
 			{
 				if (event.key.scancode == SDL_SCANCODE_ESCAPE)
 					running = false;
+
+				if (event.key.scancode == SDL_SCANCODE_E) {
+					animateDoor = true;
+					doorAnimationDir *= (- 1);
+				}
 			}
 
 			if (event.type == SDL_EVENT_QUIT)
@@ -446,6 +456,10 @@ int main() {
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
 
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
+
+		if (animateDoor) {
+			cubes[doorIndex].rotate.y += doorAnimationDir * 10.0f * renderingFixedDelta;
+		}
 
 		for (auto& cube : cubes) {
 			jobs[jobIndex] = (ThreadPool::GetInstance().SubmitJob(
