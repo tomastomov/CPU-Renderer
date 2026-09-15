@@ -16,6 +16,7 @@ namespace CPURenderer {
 		Vector3 pos;
 		Vector3 size;
 		Vector3 rotate;
+        Vector3 pivot = { 0.0f, 0.0f, 0.0f };
 	};
 
     struct CubeMesh {

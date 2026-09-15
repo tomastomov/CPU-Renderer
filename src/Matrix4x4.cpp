@@ -151,7 +151,11 @@ namespace CPURenderer {
 
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
-				result[i][j] = (arr[i][0] * other.arr[0][j]) + (arr[i][1] * other.arr[1][j]) + (arr[i][2] * other.arr[2][j] + (arr[i][3] * other.arr[3][j]));
+				result[i][j] =
+					(arr[i][0] * other.arr[0][j]) +
+					(arr[i][1] * other.arr[1][j]) +
+					(arr[i][2] * other.arr[2][j]) +
+					(arr[i][3] * other.arr[3][j]);
 			}
 		}
 

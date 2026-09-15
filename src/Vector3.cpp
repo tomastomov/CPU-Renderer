@@ -9,4 +9,8 @@ namespace CPURenderer {
 	{
 		return { x * value, y * value, z * value };
 	}
+	Vector3 Vector3::operator-()
+	{
+		return { -x, -y, -z };
+	}
 }
