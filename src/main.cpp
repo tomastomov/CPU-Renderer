@@ -281,7 +281,8 @@ int main() {
 	constexpr float renderingFixedDelta = 1.0f / 60.0f;
 
 	bool animateDoor = false;
-	int doorAnimationDir = 1;
+	int doorAnimationDir = -1;
+	float prev = 0.0f;
 
 	while (running) {
 		jobIndex = 0;
@@ -321,7 +322,8 @@ int main() {
 
 				if (event.key.scancode == SDL_SCANCODE_E) {
 					animateDoor = true;
-					doorAnimationDir *= (- 1);
+					doorAnimationDir *= (-1);
+					prev = cubes[doorIndex].rotate.y;
 				}
 			}
 
@@ -381,7 +383,11 @@ int main() {
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
 
 		if (animateDoor) {
-			cubes[doorIndex].rotate.y += doorAnimationDir * 10.0f * renderingFixedDelta;
+			cubes[doorIndex].rotate.y += doorAnimationDir * 50.0f * renderingFixedDelta;
+		}
+
+		if (std::abs(cubes[doorIndex].rotate.y - prev) >= 90.0f) {
+			animateDoor = false;
 		}
 
 		for (auto& cube : cubes) {
