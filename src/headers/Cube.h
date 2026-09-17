@@ -4,6 +4,11 @@
 #include <Vertex3.h>
 
 namespace CPURenderer {
+    struct AABB {
+        Vector3 min;
+        Vector3 max;
+    };
+
 	struct Cube {
 		Vector3 a;
 		Vector3 b;
@@ -17,6 +22,27 @@ namespace CPURenderer {
 		Vector3 size;
 		Vector3 rotate;
         Vector3 pivot = { 0.0f, 0.0f, 0.0f };
+
+        AABB GetAABB() {
+            Vector3 half = size * 0.5f;
+
+            AABB box = {
+                pos - half,
+                pos + half
+            };
+
+            return box;
+        }
+
+        bool CollidesWith(Cube& cube) {
+            AABB a = GetAABB();
+            AABB b = cube.GetAABB();
+
+            return
+                a.min.x <= b.max.x && a.max.x >= b.min.x &&
+                a.min.y <= b.max.y && a.max.y >= b.min.y &&
+                a.min.z <= b.max.z && a.max.z >= b.min.z;
+        }
 	};
 
     struct CubeMesh {

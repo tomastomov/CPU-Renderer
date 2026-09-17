@@ -43,6 +43,13 @@ double GetTime()
 		static_cast<double>(frequency);
 }
 
+struct Player
+{
+	Vector3 pos;
+	Vector3 size;
+};
+
+
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		CPURenderer::Log("Failed to init sdl video");
@@ -259,9 +266,20 @@ int main() {
 		{0.0f, 90.0f, 0.0f}  // rotate
 	});
 
+	Player player{
+		{ 0.0f, 0.0f, 0.0f },     // position
+		{ 100.0f, 400.0f, 100.0f } // collider size for later
+	};
+
+	constexpr float playerEyeHeight = 200.0f;
+
 	Camera camera{};
 
-	camera.pos.y += 200.0f;
+	camera.pos = {
+		player.pos.x,
+		player.pos.y + playerEyeHeight,
+		player.pos.z
+	};
 
 	bool running = true;
 	bool isCameraModeOn = false;
@@ -341,7 +359,7 @@ int main() {
 		Vector3 forward = {
 			-std::sin(yaw),
 			0.0f,
-			 std::cos(yaw)
+			std::cos(yaw)
 		};
 
 		Vector3 right = {
@@ -352,38 +370,41 @@ int main() {
 
 		if (keys[SDL_SCANCODE_W])
 		{
-			camera.pos.x += forward.x * moveSpeed * renderingFixedDelta;
-			camera.pos.y += forward.y * moveSpeed * renderingFixedDelta;
-			camera.pos.z += forward.z * moveSpeed * renderingFixedDelta;
+			player.pos.x += forward.x * moveSpeed * renderingFixedDelta;
+			player.pos.z += forward.z * moveSpeed * renderingFixedDelta;
 		}
 
 		if (keys[SDL_SCANCODE_S])
 		{
-			camera.pos.x -= forward.x * moveSpeed * renderingFixedDelta;
-			camera.pos.y -= forward.y * moveSpeed * renderingFixedDelta;
-			camera.pos.z -= forward.z * moveSpeed * renderingFixedDelta;
+			player.pos.x -= forward.x * moveSpeed * renderingFixedDelta;
+			player.pos.z -= forward.z * moveSpeed * renderingFixedDelta;
 		}
 
 		if (keys[SDL_SCANCODE_D])
 		{
-			camera.pos.x += right.x * moveSpeed * renderingFixedDelta;
-			camera.pos.y += right.y * moveSpeed * renderingFixedDelta;
-			camera.pos.z += right.z * moveSpeed * renderingFixedDelta;
+			player.pos.x += right.x * moveSpeed * renderingFixedDelta;
+			player.pos.z += right.z * moveSpeed * renderingFixedDelta;
 		}
 
 		if (keys[SDL_SCANCODE_A])
 		{
-			camera.pos.x -= right.x * moveSpeed * renderingFixedDelta;
-			camera.pos.y -= right.y * moveSpeed * renderingFixedDelta;
-			camera.pos.z -= right.z * moveSpeed * renderingFixedDelta;
+			player.pos.x -= right.x * moveSpeed * renderingFixedDelta;
+			player.pos.z -= right.z * moveSpeed * renderingFixedDelta;
 		}
+
+		// Camera is attached to the player's "head"
+		camera.pos = {
+			player.pos.x,
+			player.pos.y + playerEyeHeight,
+			player.pos.z
+		};
 
 		//Renderer2D::DrawQuad(quad, frameBuffer, config, gorillaTexture);
 
 		//Renderer3D::DrawTethradon(tethradon, frameBuffer, depthBuffer, config);
 
 		if (animateDoor) {
-			cubes[doorIndex].rotate.y += doorAnimationDir * 50.0f * renderingFixedDelta;
+			cubes[doorIndex].rotate.y += doorAnimationDir * 200.0f * renderingFixedDelta;
 		}
 
 		if (std::abs(cubes[doorIndex].rotate.y - prev) >= 90.0f) {
